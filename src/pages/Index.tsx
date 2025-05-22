@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,6 +36,49 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast: showToast } = useToast();
+
+  // Načtení konverzací z localStorage při prvním načtení
+  useEffect(() => {
+    try {
+      const savedConversations = localStorage.getItem('topbotConversations');
+      const savedCurrentConv = localStorage.getItem('topbotCurrentConversation');
+      
+      if (savedConversations) {
+        const parsed = JSON.parse(savedConversations);
+        // Převedení string formátu data zpět na Date objekty
+        const conversationsWithDates = parsed.map((conv: any) => ({
+          ...conv,
+          lastUpdated: new Date(conv.lastUpdated),
+          messages: conv.messages.map((msg: any) => ({
+            ...msg,
+            timestamp: new Date(msg.timestamp)
+          }))
+        }));
+        setConversations(conversationsWithDates);
+      }
+      
+      if (savedCurrentConv) {
+        setCurrentConversation(savedCurrentConv);
+      }
+    } catch (error) {
+      console.error('Chyba při načítání konverzací z localStorage:', error);
+    }
+  }, []);
+
+  // Ukládání konverzací do localStorage při každé změně
+  useEffect(() => {
+    try {
+      if (conversations.length > 0) {
+        localStorage.setItem('topbotConversations', JSON.stringify(conversations));
+      }
+      
+      if (currentConversation) {
+        localStorage.setItem('topbotCurrentConversation', currentConversation);
+      }
+    } catch (error) {
+      console.error('Chyba při ukládání konverzací do localStorage:', error);
+    }
+  }, [conversations, currentConversation]);
 
   const getCurrentMessages = (): Message[] => {
     if (!currentConversation) return [];
