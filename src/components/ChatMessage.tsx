@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, User, Loader2 } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   id: string;
@@ -21,9 +22,18 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
       <div className={`flex max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3`}>
         <Avatar className={`h-8 w-8 ${message.role === 'user' ? 'ml-3' : 'mr-3'}`}>
-          <AvatarFallback className={message.role === 'user' ? 'bg-blue-600' : 'bg-gradient-to-r from-purple-500 to-blue-500'}>
-            {message.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-          </AvatarFallback>
+          {message.role === 'user' ? (
+            <AvatarFallback className="bg-blue-600">
+              <User className="w-4 h-4" />
+            </AvatarFallback>
+          ) : (
+            <>
+              <AvatarImage src="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" alt="TopBot.PwnZ" />
+              <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500">
+                <Bot className="w-4 h-4" />
+              </AvatarFallback>
+            </>
+          )}
         </Avatar>
         <Card className={`${
           message.role === 'user' 
@@ -38,9 +48,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               </div>
             ) : (
               <div className="prose prose-invert max-w-none">
-                {message.content.split('\n').map((line, index) => (
-                  <p key={index} className="mb-2 last:mb-0 leading-relaxed">{line}</p>
-                ))}
+                <ReactMarkdown>{message.content}</ReactMarkdown>
               </div>
             )}
             <div className="text-xs opacity-70 mt-2">

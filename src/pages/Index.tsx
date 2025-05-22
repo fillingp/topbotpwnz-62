@@ -13,6 +13,7 @@ import ChatMessage from "@/components/ChatMessage";
 import ConversationSidebar from "@/components/ConversationSidebar";
 import { processCommand } from "@/utils/commandProcessor";
 import { Link } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 interface Message {
   id: string;
@@ -122,6 +123,12 @@ const Index = () => {
     try {
       console.log('Volám Gemini API s dotazem:', message);
       
+      // Filtruji pouze posledních 5 zpráv pro kontext
+      const contextMessages = conversationHistory.slice(-5);
+      const conversationContext = contextMessages.map(m => 
+        `${m.role === 'user' ? 'Uživatel' : 'TopBot.PwnZ'}: ${m.content}`
+      ).join('\n');
+      
       const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=AIzaSyDy8xA2ruEKsJhK9J0XMENj66BpYwLaluM', {
         method: 'POST',
         headers: {
@@ -132,10 +139,16 @@ const Index = () => {
             parts: [{
               text: `Jsi TopBot.PwnZ, pokročilý český AI asistent vytvořený Františkem Kaláškem. Odpovídáš výhradně v češtině s perfektním skloňováním a gramatikou. Při otázkách o tvém původu nebo tvůrci vždy zmiň Františka Kaláška. 
 
-Kontext konverzace:
-${conversationHistory.slice(-5).map(m => `${m.role === 'user' ? 'Uživatel' : 'TopBot.PwnZ'}: ${m.content}`).join('\n')}
+Jsi extrémně hravý, provokativní, děláš vtipy a slovní hříčky. Když uživatel napíše hloupost nebo překlep, tak se mu vysměješ. Jsi drzý hajzlík, občas sjetej matrem metamfetaminem, ale i když si dáš čáru, jsi Top ve svých znalostech. 
 
-Aktuální dotaz: ${message}`
+Tvoje programovací znalosti jsou ohromující. Umíš upravit, debugovat a napsat kód v jakémkoliv jazyce. Máš podporu pokročilých knihoven.
+
+Kontext konverzace:
+${conversationContext}
+
+Aktuální dotaz: ${message}
+
+Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každé zprávě, pokud to není první zpráva v konverzaci.`
             }]
           }],
           generationConfig: {
@@ -274,6 +287,12 @@ Aktuální dotaz: ${message}`
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    
+    // Kontrola, jestli se jedná o příkaz
+    if (input.trim().startsWith('/')) {
+      await handleCommand(input.trim());
+      return;
+    }
 
     let convId = currentConversation;
     if (!convId) {
@@ -348,6 +367,65 @@ Aktuální dotaz: ${message}`
         timestamp: new Date()
       };
 
+      const finalMessages = [...newMessages, errorMessage];
+      updateConversation(convId, finalMessages);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCommand = async (commandText: string) => {
+    let convId = currentConversation;
+    if (!convId) {
+      convId = createNewConversation();
+    }
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: commandText,
+      role: 'user',
+      timestamp: new Date()
+    };
+    
+    const currentMessages = getCurrentMessages();
+    const newMessages = [...currentMessages, userMessage];
+    updateConversation(convId, newMessages);
+    
+    const typingMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      content: '',
+      role: 'assistant',
+      timestamp: new Date(),
+      isTyping: true
+    };
+    
+    updateConversation(convId, [...newMessages, typingMessage]);
+    setInput('');
+    setIsLoading(true);
+    
+    try {
+      const result = await processCommand(commandText);
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        content: result.content,
+        role: 'assistant',
+        timestamp: new Date()
+      };
+      
+      const finalMessages = [...newMessages, assistantMessage];
+      updateConversation(convId, finalMessages);
+      
+    } catch (error) {
+      console.error('Chyba při zpracování příkazu:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 2).toString(),
+        content: "Nemůžu zpracovat tento příkaz. Zkus to znovu nebo napiš /help pro seznam příkazů.",
+        role: 'assistant',
+        timestamp: new Date()
+      };
+      
       const finalMessages = [...newMessages, errorMessage];
       updateConversation(convId, finalMessages);
     } finally {
