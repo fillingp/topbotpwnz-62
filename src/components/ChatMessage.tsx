@@ -4,14 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, User, Loader2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
-
-interface Message {
-  id: string;
-  content: string;
-  role: 'user' | 'assistant';
-  timestamp: Date;
-  isTyping?: boolean;
-}
+import { Message } from '@/types/chat';
 
 interface ChatMessageProps {
   message: Message;
