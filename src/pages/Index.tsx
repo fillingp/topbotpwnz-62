@@ -1,14 +1,17 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Send, Bot, User, Loader2, MessageCircle, Trash2 } from "lucide-react";
+import { Send, Bot, User, Loader2, MessageCircle, Trash2, Terminal, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useToast } from "@/hooks/use-toast";
+import ChatMessage from "@/components/ChatMessage";
+import ConversationSidebar from "@/components/ConversationSidebar";
+import { processCommand } from "@/utils/commandProcessor";
+import { Link } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -324,68 +327,35 @@ Aktuální dotaz: ${message}`
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
       {/* Sidebar s konverzacemi */}
-      <div className="w-80 bg-slate-800/50 backdrop-blur-lg border-r border-slate-700/50 flex flex-col">
-        <div className="p-4 border-b border-slate-700/50">
-          <Button 
-            onClick={createNewConversation}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
-          >
-            <MessageCircle className="w-4 h-4 mr-2" />
-            Nová konverzace
-          </Button>
-        </div>
-        
-        <ScrollArea className="flex-1 p-4">
-          <div className="space-y-2">
-            {conversations.map((conv) => (
-              <Card 
-                key={conv.id}
-                className={`cursor-pointer transition-all duration-200 hover:bg-slate-700/50 ${
-                  currentConversation === conv.id ? 'bg-slate-700/70 ring-2 ring-blue-500/50' : 'bg-slate-800/30'
-                }`}
-                onClick={() => setCurrentConversation(conv.id)}
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-medium text-slate-200 truncate">
-                        {conv.title}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {conv.lastUpdated.toLocaleDateString('cs-CZ')}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteConversation(conv.id);
-                      }}
-                      className="ml-2 h-8 w-8 p-0 hover:bg-red-500/20"
-                    >
-                      <Trash2 className="w-3 h-3 text-slate-400" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </ScrollArea>
-      </div>
+      <ConversationSidebar 
+        conversations={conversations}
+        currentConversation={currentConversation}
+        onCreateNew={createNewConversation}
+        onSelectConversation={setCurrentConversation}
+        onDeleteConversation={deleteConversation}
+      />
 
       {/* Hlavní chatová oblast */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-slate-800/50 backdrop-blur-lg border-b border-slate-700/50 p-4">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600">
-              <AvatarFallback className="text-white font-bold">TB</AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-xl font-bold text-white">TopBot.PwnZ</h1>
-              <p className="text-sm text-slate-300">Váš pokročilý český AI asistent</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600">
+                <AvatarImage src="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" alt="TopBot.PwnZ" />
+                <AvatarFallback className="text-white font-bold">TB</AvatarFallback>
+              </Avatar>
+              <div>
+                <h1 className="text-xl font-bold text-white">TopBot.PwnZ</h1>
+                <p className="text-sm text-slate-300">Váš pokročilý a drzý český AI asistent 🤪</p>
+              </div>
             </div>
+            <Link to="/about">
+              <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+                <HelpCircle className="w-4 h-4 mr-1" />
+                O aplikaci
+              </Button>
+            </Link>
           </div>
         </div>
 
@@ -395,77 +365,40 @@ Aktuální dotaz: ${message}`
             {getCurrentMessages().length === 0 ? (
               <div className="text-center py-12">
                 <Bot className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-                <h2 className="text-2xl font-bold text-white mb-2">Vítejte u TopBot.PwnZ!</h2>
+                <h2 className="text-2xl font-bold text-white mb-2">Čau kámo! 👋</h2>
                 <p className="text-slate-300 max-w-md mx-auto">
-                  Jsem váš pokročilý český AI asistent vytvořený Františkem Kaláškem. 
-                  Zeptejte se mě na cokoliv - odpovím v perfektní češtině!
+                  Jsem TopBot.PwnZ, tvůj brutálně najetej AI asistent vytvořený Františkem Kaláškem.
+                  Řekni mi něco, na co se zeptáš, nebo použij speciální příkazy jako <code>/help</code>, <code>/joke</code> nebo <code>/about</code>!
                 </p>
               </div>
             ) : (
               getCurrentMessages().map((message) => (
-                <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`flex max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start space-x-3`}>
-                    <Avatar className={`h-8 w-8 ${message.role === 'user' ? 'ml-3' : 'mr-3'}`}>
-                      <AvatarFallback className={message.role === 'user' ? 'bg-blue-600' : 'bg-gradient-to-r from-purple-500 to-blue-500'}>
-                        {message.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                      </AvatarFallback>
-                    </Avatar>
-                    <Card className={`${
-                      message.role === 'user' 
-                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white' 
-                        : 'bg-slate-800/70 text-slate-100 border-slate-700'
-                    } backdrop-blur-sm`}>
-                      <CardContent className="p-4">
-                        {message.isTyping ? (
-                          <div className="flex items-center space-x-2">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-sm">TopBot.PwnZ píše...</span>
-                          </div>
-                        ) : (
-                          <div className="prose prose-invert max-w-none">
-                            {message.content.split('\n').map((line, index) => (
-                              <p key={index} className="mb-2 last:mb-0">{line}</p>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
+                <ChatMessage key={message.id} message={message} />
               ))
             )}
           </div>
         </ScrollArea>
 
-        {/* Input oblast */}
-        <div className="bg-slate-800/50 backdrop-blur-lg border-t border-slate-700/50 p-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex space-x-4">
-              <div className="flex-1 relative">
-                <Input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Zeptejte se mě na cokoliv..."
-                  className="bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 pr-12 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
-                  disabled={isLoading}
-                />
-              </div>
-              <Button 
-                onClick={handleSend}
-                disabled={isLoading || !input.trim()}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
+        {/* Vstupní pole */}
+        <div className="p-4 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-lg">
+          <div className="max-w-4xl mx-auto flex items-end space-x-2">
+            <div className="flex-1">
+              <Input
+                className="bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus-visible:ring-purple-500"
+                placeholder="Napiš zprávu nebo použij příkaz (např. /help)"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyPress}
+                disabled={isLoading}
+              />
             </div>
-            <p className="text-xs text-slate-400 mt-2 text-center">
-              TopBot.PwnZ využívá Gemini AI 2.0+ a Perplexity pro nejlepší odpovědi v češtině
-            </p>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              onClick={handleSend}
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
           </div>
         </div>
       </div>

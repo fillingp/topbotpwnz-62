@@ -1,0 +1,22 @@
+
+{
+  "name": "TopBot.PwnZ",
+  "short_name": "TopBot.PwnZ",
+  "description": "Extrémně pokročilý český AI asistent",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#6d28d9",
+  "icons": [
+    {
+      "src": "/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
