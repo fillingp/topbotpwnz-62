@@ -13,7 +13,19 @@ export const defaultGenerationConfig = {
 
 export const defaultSafetySettings = [
   {
-    category: "HARM_CATEGORY_HARASSMENT" as unknown as HarmCategory,
-    threshold: "BLOCK_MEDIUM_AND_ABOVE" as unknown as HarmBlockThreshold
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
   }
 ];

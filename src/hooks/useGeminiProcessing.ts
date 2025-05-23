@@ -25,11 +25,16 @@ export const useGeminiProcessing = () => {
       const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       
-      const result = await model.generateContent(`
-        Analyzuj následující text a vytvoř jeho vizuální reprezentaci. 
-        Popiš, jak by měl být text vizualizován, jaké barvy, tvary a prvky by měly být použity.
-        Text: ${input}
-      `);
+      const result = await model.generateContent({
+        contents: [{ 
+          role: "user", 
+          parts: [{ 
+            text: `Analyzuj následující text a vytvoř jeho vizuální reprezentaci. 
+Popiš, jak by měl být text vizualizován, jaké barvy, tvary a prvky by měly být použity.
+Text: ${input}` 
+          }] 
+        }]
+      });
       
       setResult(result.response.text());
       setIsProcessing(false);
@@ -60,7 +65,7 @@ export const useGeminiProcessing = () => {
       const base64Data = uploadedImage.split('base64,')[1];
       
       const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-vision" });
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       
       const imagePart = {
         inlineData: {
@@ -82,6 +87,18 @@ export const useGeminiProcessing = () => {
         safetySettings: [
           {
             category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+          },
+          {
+            category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
           }
         ]

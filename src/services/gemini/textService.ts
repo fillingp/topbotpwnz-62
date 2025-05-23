@@ -19,12 +19,6 @@ export const callGeminiAPI = async (message: string, conversationHistory: any[])
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    // Correct the safety settings with proper types
-    const safetySettings = defaultSafetySettings.map(setting => ({
-      category: setting.category as HarmCategory,
-      threshold: setting.threshold as HarmBlockThreshold
-    }));
-    
     // Generative AI
     const parts = [
       {
@@ -46,7 +40,7 @@ Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každ
     const result = await model.generateContent({
       contents: [{ role: "user", parts }],
       generationConfig: defaultGenerationConfig,
-      safetySettings
+      safetySettings: defaultSafetySettings
     });
     
     const response = result.response;
@@ -78,7 +72,8 @@ export const streamGeminiResponse = async (message: string, onChunk: (text: stri
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 2048,
-      }
+      },
+      safetySettings: defaultSafetySettings
     });
     
     for await (const chunk of result.stream) {
@@ -100,19 +95,18 @@ export const getStructuredResponseFromGemini = async <T>(prompt: string, schema:
   try {
     console.log("Získávám strukturovanou odpověď z Gemini API:", prompt);
     
-    // Create a new instance of GoogleGenerativeAI
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-    
-    // Get the model for text generation
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-    
-    // Generate the structured content
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: `${prompt} (odpověz v češtině)` }] }],
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-pro",
       generationConfig: {
         temperature: 0.2,
+        responseMimeType: "application/json",
         responseSchema: schema
       }
+    });
+    
+    const result = await model.generateContent({
+      contents: [{ role: "user", parts: [{ text: `${prompt} (odpověz v češtině)` }] }]
     });
 
     const response = result.response;

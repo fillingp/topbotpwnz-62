@@ -16,8 +16,8 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
     
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     
-    // Use the Gemini Pro Vision model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-vision" });
+    // Use the current Gemini Pro Vision model
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
     
     const imagePart = {
       inlineData: {
@@ -45,6 +45,18 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
         {
           category: HarmCategory.HARM_CATEGORY_HARASSMENT,
           threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+        },
+        {
+          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }
       ]
     });
@@ -57,40 +69,18 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
 };
 
 /**
- * Generates an image using Gemini API
+ * Generates an image using Gemini API - Note: Image generation is not available in the current API
  */
 export const generateImageWithGemini = async (prompt: string): Promise<string> => {
   try {
     console.log("Generuji obrázek pomocí Gemini API:", prompt);
     
-    // Create a new instance of GoogleGenerativeAI
-    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
-    
-    const czechPrompt = `Vytvoř obrázek podle tohoto zadání: ${prompt}`;
-
-    // Use the image generation model
-    const imageModel = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-preview-image-generation" 
-    });
-    
-    // Generate the image content
-    const result = await imageModel.generateContent({
-      contents: [{ role: "user", parts: [{ text: czechPrompt }] }]
-    });
-    
-    // Get the response and extract the image data
-    const response = result.response;
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        const imageData = part.inlineData.data;
-        return `data:${part.inlineData.mimeType};base64,${imageData}`;
-      }
-    }
-
-    throw new Error("V odpovědi nebyl nalezen žádný obrázek.");
+    // Note: Gemini API doesn't currently support image generation
+    // This is a placeholder that would need to be updated when the feature becomes available
+    throw new Error("Generování obrázků pomocí Gemini API není momentálně podporováno. Použijte jiný poskytovatel pro generování obrázků.");
     
   } catch (error) {
     console.error("Chyba při generování obrázku pomocí Gemini:", error);
-    throw new Error("Nepodařilo se vygenerovat obrázek. Zkuste to prosím později.");
+    throw new Error("Nepodařilo se vygenerovat obrázek. Generování obrázků pomocí Gemini API není momentálně dostupné.");
   }
 };
