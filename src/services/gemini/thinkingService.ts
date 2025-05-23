@@ -84,7 +84,7 @@ Jsi TopBot.PwnZ, pokročilý český AI asistent. Odpovídáš výhradně v če�
     onThoughtChunk: (text: string) => void,
     onAnswerChunk: (text: string) => void,
     includeThoughts: boolean = true
-  ): Promise<void> => {
+  ): Promise<void> {
     try {
       const model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       
@@ -141,7 +141,7 @@ Jsi TopBot.PwnZ, pokročilý český AI asistent.`
   /**
    * Řeší složité logické problémy s rozšířenou analýzou
    */
-  async solveComplexProblem(prompt: string, maxTokens: number = 4096): Promise<string> => {
+  async solveComplexProblem(prompt: string, maxTokens: number = 4096): Promise<string> {
     try {
       console.log('Řeším složitý problém s rozšířenou analýzou:', prompt);
 
