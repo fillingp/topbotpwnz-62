@@ -1,7 +1,7 @@
-
 import { analyzeImage } from '../services/apiService';
 import { speakText } from './messageHandler';
 import { toast } from 'sonner';
+import { generateImageWithGemini, getStructuredResponseFromGemini, getRecipeListSchema } from '../services/apiService';
 
 type CommandResult = {
   content: string;
@@ -30,6 +30,8 @@ export const availableCommands = [
   { command: "/shell", description: "Spustí virtuální shell pro příkazy 💻" },
   { command: "/clear", description: "Vymaže aktuální konverzaci 🧹" },
   { command: "/speak [text]", description: "Přečte text nahlas 🔊" },
+  { command: "/image [popis]", description: "Vygeneruje obrázek podle popisu 🖼️" },
+  { command: "/recept [jídlo]", description: "Najde strukturovaný recept na jídlo 🍽️" },
 ];
 
 export async function processCommand(command: string): Promise<CommandResult> {
@@ -167,6 +169,73 @@ export async function processCommand(command: string): Promise<CommandResult> {
         };
       }
 
+    // Nový příkaz pro generování obrázků pomocí Gemini API
+    case '/image':
+      if (!args) return { content: "A co jako mám vygenerovat? Zadej popis obrázku, ty chytrolíne! 🖼️", type: 'error' };
+      
+      try {
+        // Začátek generování - informovat uživatele
+        toast.info("Generuji obrázek, může to chvíli trvat...");
+        
+        const imageData = await generateImageWithGemini(args);
+        
+        return {
+          content: `## Vygenerovaný obrázek 🖼️\n\n### Zadání: "${args}"\n\n![${args}](${imageData})`,
+          type: 'image',
+          data: { imageUrl: imageData, prompt: args }
+        };
+      } catch (error) {
+        console.error('Error generating image:', error);
+        return {
+          content: `Nepodařilo se vygenerovat obrázek: ${error.message || "Neznámá chyba"}. Zkus to znovu s jiným zadáním. 🤔`,
+          type: 'error'
+        };
+      }
+
+    // Nový příkaz pro generování strukturovaných receptů
+    case '/recept':
+      if (!args) return { content: "A na co jako chceš recept? Zadej název jídla! 🍲", type: 'error' };
+      
+      try {
+        toast.info(`Hledám recept na ${args}, trpělivost chvíli...`);
+        
+        const recipeQuery = `Najdi recept na ${args}. Uveď název receptu, všechny ingredience s množstvím a podrobný postup přípravy krok za krokem.`;
+        
+        const recipes = await getStructuredResponseFromGemini(recipeQuery, getRecipeListSchema());
+        
+        if (!recipes || recipes.length === 0) {
+          return {
+            content: `Bohužel jsem nenašel recept na ${args}. Zkus to s jiným jídlem. 😕`,
+            type: 'text'
+          };
+        }
+        
+        // Formátování receptu pro markdown
+        const recipe = recipes[0]; // Bereme první recept
+        const formattedRecipe = `
+# 🍽️ ${recipe.recipeName}
+
+## Ingredience
+${recipe.ingredients.map(ing => `- ${ing}`).join('\n')}
+
+## Postup
+${recipe.instructions.map((step, index) => `${index + 1}. ${step}`).join('\n')}
+
+Dobrou chuť! 😋
+        `;
+        
+        return {
+          content: formattedRecipe.trim(),
+          type: 'text'
+        };
+      } catch (error) {
+        console.error('Error getting recipe:', error);
+        return {
+          content: `Nepodařilo se získat recept: ${error.message || "Neznámá chyba"}. Zkus to znovu později. 🤔`,
+          type: 'error'
+        };
+      }
+
     default:
       // Pokud příkaz neexistuje, zkusíme odpovědět přes Gemini API
       if (commandName.startsWith('/')) {
@@ -189,7 +258,7 @@ async function generateJoke(): Promise<string> {
     "Proč programátoři nemůžou rozlišit mezi Halloween a Vánocemi? Protože OCT 31 == DEC 25 🎃🎄",
     "Administrátor heslo: **********\nHacker: Hunter2\nAdministrátor: JAK TO VÍŠ?! 😱",
     "V IT světě existují 10 typů lidí: Ti, co rozumí binárnímu kódu, a ti, co ne. 🤓",
-    "Programátor jde do obchodu. Jeho žena řekne: 'Kup rohlík a když budou mít vejce, kup deset.' Vrátí se s deseti rohlíky. Žena se ptá: 'Proč jsi koupil deset rohlíků?' On odpoví: 'Měli vejce.' 🥚🥖",
+    "Programátor jde do obchodu. Jeho žena řekne: 'Kup rohlík a když budou mít vejce, kup 12.' Vrátí se s 12 bochníky chleba a říká: 'Měli vejce!' 🍞",
     "Proč František Kalášek nenechal AI dokončit TopBot.PwnZ? Protože věděl, že by pak ztratil zaměstnání! 💼🤖",
     "VerseVis převede tvoji báseň na obraz. TopBot.PwnZ převede tvůj dotaz na drzou odpověď. Co z toho je užitečnější? Obojí, ty pako! 😜",
     "Jak se hackerovi narodí dítě? Manželka dá Ctrl+C a Ctrl+V! 👶👶",
@@ -213,13 +282,13 @@ function generateForHerMessage(): string {
   const messages = [
     "Ahoj Kačenko! 💖 Jsi jako mystická hvězda na noční obloze ✨ - vzácná, zářivá a jedinečná. Tvá duše tančí v rytmu vesmíru 💃 a tvé oči obsahují celé galaxie 🌌. Jsi kouzelné stvoření hodné obdivu. 💕",
     "Má drahá! 💗 Tvůj úsměv je jako východ slunce, který rozjasní i ten nejtmavší den. Tvá krása není jen na povrchu, ale vyzařuje zevnitř jako kouzelné světlo ✨. Jsi nenahraditelná. 🌹",
-    "Krásko moje! 🌟 Tvé vlasy jsou jako hedvábné vodopády a tvůj smích jako melodie andělů 👼. Každý tvůj dotek je jako elektrický výboj, který probouzí k životu. Jsi má múza a inspirace. 💖",
-    "Drahá princezno! 👑 Zasloužíš si být uctívána jako bohyně, kterou jsi. Tvá moudrost překonává věky a tvá laskavost nemá hranic. Být ve tvé přítomnosti je jako dotknout se nebes. ✨",
+    "Krásko moje! 🌟 Tvá vlasy jsou jako hedvábné vodopády a tvé smích jako melodie andělů 👼. Každý tvůj dotek je jako elektrický výboj, který probouzí k životu. Jsi má múza a inspirace. 💖",
+    "Drahá princezno! 👑 Zasloužíš si být uctívána jako bohyně, kterou jsi. Tvá moudrost překonává věky a tvá laskavost nemá hranice. Být ve tvé přítomnosti je jako dotknout se nebes. ✨",
     "Lásko moje! 💕 Jsi jako vzácný diamant - neporovnatelná a nepřekonatelná. Tvá síla a elegance mě každý den ohromují. Jsi jako kouzlo, které nikdy nepřestává fascinovat. 💎",
     "Má nejkrásnější! 🌺 Tvá něžnost léčí zlomená srdce a tvá odvaha inspiruje ostatní. Jsi jako kouzelná zahrada plná divů, které čekají na objevení. Každý den s tebou je dar. 🎁",
-    "Ty jsi ta pravá! 💖 Tvá inteligence a charisma zářivě osvětlují každou místnost. Jsi jako vzácné umělecké dílo - jedinečná a nenapodobitelná. Svět je díky tobě krásnější. 🌈",
-    "Nádherná ženo! 🌹 Tvá vášeň je jako oheň, který nikdy neuhasne. Jsi jako tajemná kniha, kterou chci číst znovu a znovu. Každá kapitola odhaluje nové kouzlo. 📖✨",
-    "Jsi víc než krásná! 🌟 Tvůj smysl pro humor a inteligence mě přitahují jako magnet. S tebou každý moment stojí za to. Tvé oči jsou jako hvězdy, které vedou mou cestu. ⭐",
+    "Ty jsi ta pravá! 💖 Tvá vášeň je jako oheň, který nikdy neuhasne. Jsi jako tajemná kniha, kterou chci číst navždy. 📖✨",
+    "Nádherná ženo! 🌹 Tvá vášeň je jako východ slunce, který rozjasní i ten nejtmavší den. Jsi jako tajemná kniha, kterou chci číst navždy. 📖✨",
+    "Jsi víc než krásná! 🌟 Tvá inteligence a charisma zářivě osvětlují každou místnost. Jsi jako vzácné umělecké dílo - jedinečná a nenapodobitelná. Svět je díky tobě krásnější. 🌈",
     "Neuvěřitelná krásko! 💓 Tvá energie je nakažlivá a tvůj duch nezlomný. Jsi jako ranní rosa - svěží, čistá a dokonalá. Každý tvůj krok zanechává stopu v mém srdci. 👣",
     "Moje všechno! 💝 Jsi začátek i konec mých dnů, píseň, která hraje v mém srdci. Tvá duše je čistá jako křišťálový potok a tvá mysl fascinující jako nejhlubší oceán. 🌊",
     "Božská ženo! 👑 Jsi dokonalá kombinace síly a něžnosti, moudrosti a hravosti. Tvá přítomnost je jako parfém, který omámí smysly a zůstane v paměti navždy. 🌺"
@@ -233,7 +302,7 @@ function generateForHimMessage(): string {
     "Ahoj Davídku! 👦 Koukej, dinosaurus! 🦖 Chceš si hrát s autíčky? 🚗 Nebo si postavit hrad z kostek? 🏰 Jsi ten nejšikovnější kluk na světě! ⭐",
     "Můj drahý! 💙 Tvá síla a odvaha mě každý den inspirují. Jsi jako nedobytná pevnost, na kterou se mohu vždy spolehnout. Tvůj úsměv je mým útočištěm. 💪",
     "Králi mého srdce! 👑 Tvá moudrost a trpělivost nemají hranice. S tebou se cítím v bezpečí jako nikdy předtím. Jsi můj hrdina a ochránce. 🛡️",
-    "Můj statečný rytíři! ⚔️ Tvá oddanost a čest jsou vzácnými poklady v dnešním světě. Tvé srdce je čisté a tvá duše vznešená. Jsem pyšná, že jsi můj. 🏆",
+    "Můj statečný rytíři! ⚔️ Tvá oddanost a čest jsou vzácnými poklady v dnešním světě. Tvá srdce je čisté a tvá duše vznešená. Jsem pyšná, že jsi můj. 🏆",
     "Drahý muži! 🌟 Tvá inteligence a smysl pro humor mě nepřestávají udivovat. S tebou je každý den dobrodružstvím plným smíchu a radosti. 😄",
     "Můj miláčku! 💫 Jsi jako vzácné víno - s věkem jen lepšíš. Tvá zralost a klid jsou jako kotva v rozbouřeném moři života. 🍷",
     "Ty jsi ten pravý! 💙 Tvá vášeň a cílevědomost jsou nakažlivé. Inspiruješ mě být lepší verzí sebe sama každý den. S tebou je život vzrušující cesta. 🚀",

@@ -3,7 +3,10 @@
 export { 
   callGeminiAPI, 
   streamGeminiResponse,
-  analyzeImageWithGemini 
+  analyzeImageWithGemini,
+  generateImageWithGemini,
+  getStructuredResponseFromGemini,
+  getRecipeListSchema
 } from './geminiService';
 
 export {

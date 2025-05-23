@@ -2,7 +2,9 @@
 import { 
   GoogleGenerativeAI,
   HarmCategory, 
-  HarmBlockThreshold 
+  HarmBlockThreshold,
+  Modality,
+  Type
 } from '@google/generative-ai';
 
 const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
@@ -148,3 +150,88 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
     throw new Error("Nepodařilo se analyzovat obrázek. Došlo k chybě při komunikaci s Gemini Vision API.");
   }
 };
+
+// Nová funkce pro generování obrázků pomocí Gemini API
+export const generateImageWithGemini = async (prompt: string): Promise<string> => {
+  try {
+    console.log("Generuji obrázek pomocí Gemini API:", prompt);
+    
+    const ai = new GoogleGenerativeAI(GOOGLE_API_KEY);
+    
+    const czechPrompt = `Vytvoř obrázek podle tohoto zadání: ${prompt}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash-preview-image-generation",
+      contents: czechPrompt,
+      config: {
+        responseModalities: [Modality.TEXT, Modality.IMAGE],
+      },
+    });
+
+    // Find the image part
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        const imageData = part.inlineData.data;
+        return `data:${part.inlineData.mimeType};base64,${imageData}`;
+      }
+    }
+
+    throw new Error("V odpovědi nebyl nalezen žádný obrázek.");
+    
+  } catch (error) {
+    console.error("Chyba při generování obrázku pomocí Gemini:", error);
+    throw new Error("Nepodařilo se vygenerovat obrázek. Zkuste to prosím později.");
+  }
+};
+
+// Nová funkce pro generování strukturovaných odpovědí pomocí Gemini API
+export const getStructuredResponseFromGemini = async <T>(prompt: string, schema: any): Promise<T> => {
+  try {
+    console.log("Získávám strukturovanou odpověď z Gemini API:", prompt);
+    
+    const ai = new GoogleGenerativeAI(GOOGLE_API_KEY);
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: `${prompt} (odpověz v češtině)`,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: schema
+      },
+    });
+
+    return JSON.parse(response.text());
+  } catch (error) {
+    console.error("Chyba při získávání strukturované odpovědi:", error);
+    throw new Error("Nepodařilo se získat strukturovanou odpověď. Zkuste to prosím později.");
+  }
+};
+
+// Pomocná funkce pro vytvoření schématu seznamu receptů
+export const getRecipeListSchema = () => {
+  return {
+    type: Type.ARRAY,
+    items: {
+      type: Type.OBJECT,
+      properties: {
+        recipeName: {
+          type: Type.STRING,
+        },
+        ingredients: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.STRING,
+          },
+        },
+        instructions: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.STRING,
+          },
+        },
+      },
+      propertyOrdering: ["recipeName", "ingredients", "instructions"],
+    },
+  };
+};
+

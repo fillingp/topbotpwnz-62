@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { HelpCircle } from "lucide-react";
+import { HelpCircle, Image, BadgeInfo } from "lucide-react";
 
 const ChatHeader: React.FC = () => {
   return (
@@ -19,12 +19,20 @@ const ChatHeader: React.FC = () => {
             <p className="text-sm text-slate-300">Váš pokročilý český AI asistent 🧠</p>
           </div>
         </div>
-        <Link to="/about">
-          <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
-            <HelpCircle className="w-4 h-4 mr-1" />
-            O aplikaci
-          </Button>
-        </Link>
+        <div className="flex space-x-2">
+          <Link to="/image-generator">
+            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+              <Image className="w-4 h-4 mr-1" />
+              Generátor
+            </Button>
+          </Link>
+          <Link to="/about">
+            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+              <BadgeInfo className="w-4 h-4 mr-1" />
+              O aplikaci
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
