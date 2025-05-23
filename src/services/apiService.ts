@@ -6,8 +6,9 @@ export {
   analyzeImageWithGemini,
   generateImageWithGemini,
   getStructuredResponseFromGemini,
-  getRecipeListSchema
-} from './gemini';
+  getRecipeListSchema,
+  createGenAI
+} from './geminiService';
 
 export {
   streamGeminiAudio,

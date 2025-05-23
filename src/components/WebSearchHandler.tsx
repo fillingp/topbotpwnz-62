@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { toast } from "sonner";
 import { Message } from '@/types/chat';
-import { performWebSearch } from '@/services/searchService';
+import { performWebSearch } from '@/services/apiService';
 
 interface WebSearchHandlerProps {
   messages: Message[];
