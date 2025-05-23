@@ -7,7 +7,7 @@ export {
   generateImageWithGemini,
   getStructuredResponseFromGemini,
   getRecipeListSchema
-} from './geminiService';
+} from './gemini';
 
 export {
   streamGeminiAudio,
