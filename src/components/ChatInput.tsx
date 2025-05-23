@@ -53,7 +53,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
         </div>
       </div>
       <div className="text-xs text-center text-slate-400 mt-2">
-        Klávesové zkratky: Alt+H (help), Alt+J (joke), Alt+F (forher), Alt+I (image), Alt+C (clear)
+        Klávesové zkratky: Alt+H (help), Alt+J (joke), Alt+F (forher), Alt+M (forhim), Alt+I (image), Alt+C (clear)
       </div>
     </div>
   );

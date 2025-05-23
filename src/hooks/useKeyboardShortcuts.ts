@@ -5,6 +5,7 @@ type KeyboardShortcutProps = {
   onHelp: () => void;
   onJoke: () => void;
   onForHer: () => void;
+  onForHim?: () => void;
   onImageAnalysis: () => void;
   onClearChat: () => void;
 };
@@ -13,6 +14,7 @@ export const useKeyboardShortcuts = ({
   onHelp,
   onJoke,
   onForHer,
+  onForHim,
   onImageAnalysis,
   onClearChat,
 }: KeyboardShortcutProps) => {
@@ -39,6 +41,12 @@ export const useKeyboardShortcuts = ({
             onForHer();
             event.preventDefault();
             break;
+          case 'm':
+            if (onForHim) {
+              onForHim();
+              event.preventDefault();
+            }
+            break;
           case 'i':
             onImageAnalysis();
             event.preventDefault();
@@ -56,5 +64,5 @@ export const useKeyboardShortcuts = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onHelp, onJoke, onForHer, onImageAnalysis, onClearChat]);
+  }, [onHelp, onJoke, onForHer, onForHim, onImageAnalysis, onClearChat]);
 };

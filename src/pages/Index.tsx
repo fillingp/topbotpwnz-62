@@ -221,6 +221,7 @@ const Index = () => {
     onHelp: () => handleCommand('/help'),
     onJoke: () => handleCommand('/joke'),
     onForHer: () => handleCommand('/forher'),
+    onForHim: () => handleCommand('/forhim'),
     onImageAnalysis: () => setShowImageUploader(true),
     onClearChat: () => handleCommand('/clear'),
   });

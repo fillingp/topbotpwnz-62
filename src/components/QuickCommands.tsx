@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Camera, Laugh, Heart, Sparkles } from "lucide-react";
+import { Camera, Laugh, Heart, Sparkles, Smile } from "lucide-react";
 
 interface QuickCommandsProps {
   onCommandSelected: (command: string) => void;
@@ -39,6 +39,16 @@ const QuickCommands: React.FC<QuickCommandsProps> = ({ onCommandSelected, onImag
       >
         <Heart className="w-4 h-4 mr-1" />
         /forher
+      </Button>
+      
+      <Button 
+        variant="outline"
+        size="sm"
+        className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white"
+        onClick={() => onCommandSelected("/forhim")}
+      >
+        <Smile className="w-4 h-4 mr-1" />
+        /forhim
       </Button>
       
       <Button 
