@@ -5,8 +5,8 @@ import {
   HarmBlockThreshold
 } from '@google/generative-ai';
 
-// Import the Google GenAI client correctly from @google/genai
-import * as genai from '@google/genai';
+// We don't need dual imports - we'll just use the main GoogleGenerativeAI library
+// Remove the incorrect import and just rely on the one above
 
 const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
 
@@ -152,26 +152,30 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
   }
 };
 
-// Nová funkce pro generování obrázků pomocí Gemini API
+// Fixed function for generating images with Gemini API
 export const generateImageWithGemini = async (prompt: string): Promise<string> => {
   try {
     console.log("Generuji obrázek pomocí Gemini API:", prompt);
     
-    // Použití správné instance z @google/genai
-    const genaiClient = new genai.GoogleGenerativeAI(GOOGLE_API_KEY);
+    // Create a new instance of GoogleGenerativeAI
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     
     const czechPrompt = `Vytvoř obrázek podle tohoto zadání: ${prompt}`;
 
-    // Použití správného rozhraní pro generování obrázků
-    const result = await genaiClient.generateContent({
-      model: "gemini-2.0-flash-preview-image-generation",
+    // Use the image generation model
+    const imageModel = genAI.getGenerativeModel({ 
+      model: "gemini-2.0-flash-preview-image-generation"
+    });
+    
+    // Generate the image content
+    const result = await imageModel.generateContent({
       contents: [{ role: "user", parts: [{ text: czechPrompt }] }],
-      config: {
+      generationConfig: {
         responseMultimodalOutputs: true
       }
     });
     
-    // Procházení všech částí odpovědi k nalezení obrázku
+    // Get the response and extract the image data
     const response = result.response;
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {
@@ -188,26 +192,29 @@ export const generateImageWithGemini = async (prompt: string): Promise<string> =
   }
 };
 
-// Nová funkce pro generování strukturovaných odpovědí pomocí Gemini API
+// Fixed function for structured responses
 export const getStructuredResponseFromGemini = async <T>(prompt: string, schema: any): Promise<T> => {
   try {
     console.log("Získávám strukturovanou odpověď z Gemini API:", prompt);
     
-    // Použití správné instance z @google/genai
-    const genaiClient = new genai.GoogleGenerativeAI(GOOGLE_API_KEY);
+    // Create a new instance of GoogleGenerativeAI
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     
-    const result = await genaiClient.generateContent({
-      model: "gemini-2.0-flash",
+    // Get the model for text generation
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    
+    // Generate the structured content
+    const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: `${prompt} (odpověz v češtině)` }] }],
-      config: {
-        responseSchemaVersion: 'v1',
+      generationConfig: {
+        temperature: 0.2,
         responseSchema: schema
       }
     });
 
     const response = result.response;
     
-    // Kontrola, zda máme textovou odpověď a zpracování JSON
+    // Parse the JSON response
     if (response.text()) {
       return JSON.parse(response.text()) as T;
     }

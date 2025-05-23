@@ -287,7 +287,7 @@ function generateForHerMessage(): string {
     "Ty jsi ta pravá! 💖 Tvá vášeň je jako oheň, který nikdy neuhasne. Jsi jako tajemná kniha, kterou chci číst navždy. 📖✨",
     "Nádherná ženo! 🌹 Tvá vášeň je jako východ slunce, který rozjasní i ten nejtmavší den. Jsi jako tajemná kniha, kterou chci číst navždy. 📖✨",
     "Jsi víc než krásná! 🌈 Tvá inteligence a charisma zářivě osvětlují každou místnost. Jsi jako vzácné umělecké dílo - jedinečná a nenapodobitelná. Svět je díky tobě krásnější. 🌈",
-    "Neuvěřitelná krásko! 💓 Tvá energie je nakažlivá a tvůj duch nezlomný. Jsi jako ranní rosa - svěží, čistá a dokonalá. Každý tvůj krok zanechává stopu v mém srdci. 👣",
+    "Neuvěřitelná krásko! 💞 Tvá energie je nakažlivá a tvůj duch nezlomný. Jsi jako ranní rosa - svěží, čistá a dokonalá. Každý tvůj krok zanechává stopu v mém srdci. 👣",
     "Moje všechno! 💝 Jsi začátek i konec mých dnů, píseň, která hraje v mém srdci. Tvá duše je čistá jako křišťálový potok a tvá mysl fascinující jako nejhlubší oceán. 🌊",
     "Božská ženo! 👑 Jsi dokonalá kombinace síly a něžnosti, moudrosti a hravosti. Tvá přítomnost je jako parfém, který omámí smysly a zůstane v paměti navždy. 🌺"
   ];
