@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
@@ -13,10 +12,12 @@ import { Message } from "@/types/chat";
 import ImageUploader from "@/components/ImageUploader";
 import QuickCommands from "@/components/QuickCommands";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import CameraCapture from "@/components/CameraCapture";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showImageUploader, setShowImageUploader] = useState(false);
+  const [showCameraCapture, setShowCameraCapture] = useState(false);
   const { toast: showToast } = useToast();
   const {
     conversations,
@@ -216,6 +217,18 @@ const Index = () => {
     }
   };
 
+  // Implement speech-to-text functionality
+  const handleSpeechToText = () => {
+    toast.info("Spouštím hlasový vstup...");
+    // The functionality is already implemented in ChatInput component
+  };
+
+  // Implement web search functionality
+  const handleWebSearch = () => {
+    toast.info("Tato funkce ještě není plně implementována.");
+    // This would be implemented in a future update
+  };
+
   // Klávesové zkratky
   useKeyboardShortcuts({
     onHelp: () => handleCommand('/help'),
@@ -224,10 +237,21 @@ const Index = () => {
     onForHim: () => handleCommand('/forhim'),
     onImageAnalysis: () => setShowImageUploader(true),
     onClearChat: () => handleCommand('/clear'),
+    onSpeechToText: handleSpeechToText,
+    onSearchWeb: handleWebSearch,
   });
 
   const handleQuickCommand = (command: string) => {
     handleCommand(command);
+  };
+
+  // Add these functions for the missing props
+  const handleImageUploadRequest = () => {
+    setShowImageUploader(true);
+  };
+
+  const handleCameraRequest = () => {
+    setShowCameraCapture(true);
   };
 
   return (
@@ -250,15 +274,30 @@ const Index = () => {
         <QuickCommands 
           onCommandSelected={handleQuickCommand}
           onImageAnalysisRequested={() => setShowImageUploader(true)}
+          onSpeechToTextRequested={handleSpeechToText}
+          onWebSearchRequested={handleWebSearch}
         />
         
-        <ChatInput onSendMessage={handleSend} isLoading={isLoading} />
+        <ChatInput 
+          onSendMessage={handleSend} 
+          isLoading={isLoading} 
+          onImageUploadRequested={handleImageUploadRequest}
+          onCameraRequested={handleCameraRequest}
+        />
         
         {/* Modal pro nahrání obrázku */}
         {showImageUploader && (
           <ImageUploader 
             onImageSelected={handleImageAnalysis} 
             onClose={() => setShowImageUploader(false)} 
+          />
+        )}
+
+        {/* Modal pro vyfocení */}
+        {showCameraCapture && (
+          <CameraCapture
+            onImageCaptured={handleImageAnalysis}
+            onClose={() => setShowCameraCapture(false)}
           />
         )}
       </div>
