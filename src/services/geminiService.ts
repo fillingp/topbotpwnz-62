@@ -1,4 +1,3 @@
-
 import { 
   GoogleGenerativeAI,
   HarmCategory, 
@@ -167,12 +166,10 @@ export const generateImageWithGemini = async (prompt: string): Promise<string> =
       model: "gemini-2.0-flash-preview-image-generation"
     });
     
-    // Generate the image content
+    // Generate the image content - use the proper API format
+    // We need to avoid using responseMultimodalOutputs which is not valid
     const result = await imageModel.generateContent({
-      contents: [{ role: "user", parts: [{ text: czechPrompt }] }],
-      generationConfig: {
-        responseMultimodalOutputs: true
-      }
+      contents: [{ role: "user", parts: [{ text: czechPrompt }] }]
     });
     
     // Get the response and extract the image data
