@@ -30,3 +30,4 @@ export const imageCommand = async (prompt: string): Promise<CommandResult> => {
     };
   }
 };
+

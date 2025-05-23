@@ -130,7 +130,7 @@ const Index = () => {
           messages={messages}
           currentConversation={currentConversation}
           updateConversation={updateConversation}
-          setIsLoading={setIsLoading => setIsLoading}
+          setIsLoading={isLoading => setIsLoading}
         />
         
         {/* Modal pro nahrání obrázku */}
