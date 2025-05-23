@@ -2,22 +2,25 @@
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Camera, Mic, Image, MicOff } from "lucide-react";
+import { Send, Loader2, Camera, Mic, Image, MicOff, Code } from "lucide-react";
 import { toast } from 'sonner';
 import { AudioRecorder, recognizeSpeech } from '@/utils/speechService';
+import { generateCode } from '@/utils/messageHandler';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
   isLoading: boolean;
   onImageUploadRequested: () => void;
   onCameraRequested: () => void;
+  onCodeGenerationRequested: () => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ 
   onSendMessage, 
   isLoading, 
   onImageUploadRequested,
-  onCameraRequested
+  onCameraRequested,
+  onCodeGenerationRequested
 }) => {
   const [input, setInput] = useState('');
   const [isRecording, setIsRecording] = useState(false);
@@ -73,8 +76,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
+  const handleCodeGeneration = () => {
+    onCodeGenerationRequested();
+  };
+
   return (
-    <div className="p-4 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-lg">
+    <div className="p-3 border-t border-slate-700/50 bg-slate-800/50 backdrop-blur-lg">
       <div className="max-w-4xl mx-auto flex items-end space-x-2">
         <div className="flex-1 relative">
           <Input
@@ -89,7 +96,19 @@ const ChatInput: React.FC<ChatInputProps> = ({
             {input.startsWith('/') && <span className="text-xs bg-slate-600 px-1 rounded">příkaz</span>}
           </div>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex space-x-1 md:space-x-2">
+          {/* Code Generation Button */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="bg-slate-700 hover:bg-slate-600 hidden sm:flex"
+            onClick={handleCodeGeneration}
+            disabled={isLoading}
+            title="Generovat kód"
+          >
+            <Code className="w-4 h-4" />
+          </Button>
+
           {/* Mic Button */}
           <Button
             variant="outline"
@@ -136,7 +155,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           </Button>
         </div>
       </div>
-      <div className="text-xs text-center text-slate-400 mt-2">
+      <div className="text-xs text-center text-slate-400 mt-1 hidden sm:block">
         Klávesové zkratky: Alt+H (help), Alt+J (joke), Alt+F (forher), Alt+M (forhim), Alt+I (image), Alt+C (clear), Alt+S (speech)
       </div>
     </div>
