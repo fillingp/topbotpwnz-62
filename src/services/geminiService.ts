@@ -2,10 +2,10 @@
 import { 
   GoogleGenerativeAI,
   HarmCategory, 
-  HarmBlockThreshold,
-  Modality,
-  Type
+  HarmBlockThreshold
 } from '@google/generative-ai';
+
+import { genAI as createGenAI } from '@google/genai';
 
 const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
 
@@ -156,19 +156,22 @@ export const generateImageWithGemini = async (prompt: string): Promise<string> =
   try {
     console.log("Generuji obrázek pomocí Gemini API:", prompt);
     
-    const ai = new GoogleGenerativeAI(GOOGLE_API_KEY);
+    // Použití @google/genai pro generování obrázků, protože má potřebná API
+    const genai = createGenAI(GOOGLE_API_KEY);
     
     const czechPrompt = `Vytvoř obrázek podle tohoto zadání: ${prompt}`;
 
-    const response = await ai.models.generateContent({
+    // Použití správného rozhraní pro generování obrázků
+    const result = await genai.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
-      contents: czechPrompt,
-      config: {
-        responseModalities: [Modality.TEXT, Modality.IMAGE],
-      },
+      contents: [{ role: "user", parts: [{ text: czechPrompt }] }],
+      generationConfig: {
+        responseMultimodalOutputs: true
+      }
     });
-
-    // Find the image part
+    
+    // Procházení všech částí odpovědi k nalezení obrázku
+    const response = result.response;
     for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {
         const imageData = part.inlineData.data;
@@ -189,18 +192,26 @@ export const getStructuredResponseFromGemini = async <T>(prompt: string, schema:
   try {
     console.log("Získávám strukturovanou odpověď z Gemini API:", prompt);
     
-    const ai = new GoogleGenerativeAI(GOOGLE_API_KEY);
-
-    const response = await ai.models.generateContent({
+    // Použití @google/genai pro strukturovanou odpověď
+    const genai = createGenAI(GOOGLE_API_KEY);
+    
+    const result = await genai.generateContent({
       model: "gemini-2.0-flash",
-      contents: `${prompt} (odpověz v češtině)`,
-      config: {
-        responseMimeType: "application/json",
+      contents: [{ role: "user", parts: [{ text: `${prompt} (odpověz v češtině)` }] }],
+      generationConfig: {
+        responseSchemaVersion: 'v1',
         responseSchema: schema
-      },
+      }
     });
 
-    return JSON.parse(response.text());
+    const response = result.response;
+    
+    // Kontrola, zda máme textovou odpověď a zpracování JSON
+    if (response.text()) {
+      return JSON.parse(response.text()) as T;
+    }
+    
+    throw new Error("Nebyla vrácena žádná strukturovaná odpověď.");
   } catch (error) {
     console.error("Chyba při získávání strukturované odpovědi:", error);
     throw new Error("Nepodařilo se získat strukturovanou odpověď. Zkuste to prosím později.");
@@ -210,28 +221,27 @@ export const getStructuredResponseFromGemini = async <T>(prompt: string, schema:
 // Pomocná funkce pro vytvoření schématu seznamu receptů
 export const getRecipeListSchema = () => {
   return {
-    type: Type.ARRAY,
+    type: "array",
     items: {
-      type: Type.OBJECT,
+      type: "object",
       properties: {
         recipeName: {
-          type: Type.STRING,
+          type: "string"
         },
         ingredients: {
-          type: Type.ARRAY,
+          type: "array",
           items: {
-            type: Type.STRING,
-          },
+            type: "string"
+          }
         },
         instructions: {
-          type: Type.ARRAY,
+          type: "array",
           items: {
-            type: Type.STRING,
-          },
-        },
+            type: "string"
+          }
+        }
       },
-      propertyOrdering: ["recipeName", "ingredients", "instructions"],
-    },
+      required: ["recipeName", "ingredients", "instructions"]
+    }
   };
 };
-

@@ -203,7 +203,8 @@ export async function processCommand(command: string): Promise<CommandResult> {
         
         const recipes = await getStructuredResponseFromGemini(recipeQuery, getRecipeListSchema());
         
-        if (!recipes || recipes.length === 0) {
+        // Bezpečné ověření, zda recipes je pole a zda má položky
+        if (!Array.isArray(recipes) || recipes.length === 0) {
           return {
             content: `Bohužel jsem nenašel recept na ${args}. Zkus to s jiným jídlem. 😕`,
             type: 'text'
@@ -265,9 +266,6 @@ async function generateJoke(): Promise<string> {
     "Co řekne programátor na prvním rande? 'Zatímco já jsem single, ty jsi double!' 💕",
     "Kolik programátorů potřebuješ k výměně žárovky? Žádného, to je hardwarový problém. 💡",
     "Jaký je rozdíl mezi programátorem a Bohem? Bůh si nemyslí, že je programátor. 🧙‍♂️",
-    "Proč se programátoři bojí přírody? Tam není Wi-Fi! 🌳📵",
-    "Co dostaneš, když zkřížíš programátora s filozofem? Někoho, kdo stále hledá bug v existenci. 🤔",
-    "Jak poznáš extrovertního programátora? Při rozhovoru se dívá na TVOJE boty! 👞",
     "Proč programátoři nemají rádi přírodu? Má příliš mnoho bugů! 🐞",
     "Proč si programátor nemohl najít dívku? Protože nepochopil kontext! 🤦‍♂️",
     "Programátor jde do obchodu: 'Měli byste mléko?' Prodavač: 'Ano'. Programátor: 'Super, tak já si vezmu čaj.' ☕",
@@ -281,14 +279,14 @@ async function generateJoke(): Promise<string> {
 function generateForHerMessage(): string {
   const messages = [
     "Ahoj Kačenko! 💖 Jsi jako mystická hvězda na noční obloze ✨ - vzácná, zářivá a jedinečná. Tvá duše tančí v rytmu vesmíru 💃 a tvé oči obsahují celé galaxie 🌌. Jsi kouzelné stvoření hodné obdivu. 💕",
-    "Má drahá! 💗 Tvůj úsměv je jako východ slunce, který rozjasní i ten nejtmavší den. Tvá krása není jen na povrchu, ale vyzařuje zevnitř jako kouzelné světlo ✨. Jsi nenahraditelná. 🌹",
+    "Má drahá! 💗 Tvá vášeň je jako východ slunce, který rozjasní i ten nejtmavší den. Tvá krása není jen na povrchu, ale vyzařuje zevnitř jako kouzelné světlo ✨. Jsi nenahraditelná. 🌹",
     "Krásko moje! 🌟 Tvá vlasy jsou jako hedvábné vodopády a tvé smích jako melodie andělů 👼. Každý tvůj dotek je jako elektrický výboj, který probouzí k životu. Jsi má múza a inspirace. 💖",
-    "Drahá princezno! 👑 Zasloužíš si být uctívána jako bohyně, kterou jsi. Tvá moudrost překonává věky a tvá laskavost nemá hranice. Být ve tvé přítomnosti je jako dotknout se nebes. ✨",
+    "Drahá princezno! 👑 Zaslouží si být uctívána jako bohyně, kterou jsi. Tvá moudrost překonává věky a tvá laskavost nemá hranice. Být ve tvé přítomnosti je jako dotknout se nebes. ✨",
     "Lásko moje! 💕 Jsi jako vzácný diamant - neporovnatelná a nepřekonatelná. Tvá síla a elegance mě každý den ohromují. Jsi jako kouzlo, které nikdy nepřestává fascinovat. 💎",
     "Má nejkrásnější! 🌺 Tvá něžnost léčí zlomená srdce a tvá odvaha inspiruje ostatní. Jsi jako kouzelná zahrada plná divů, které čekají na objevení. Každý den s tebou je dar. 🎁",
     "Ty jsi ta pravá! 💖 Tvá vášeň je jako oheň, který nikdy neuhasne. Jsi jako tajemná kniha, kterou chci číst navždy. 📖✨",
     "Nádherná ženo! 🌹 Tvá vášeň je jako východ slunce, který rozjasní i ten nejtmavší den. Jsi jako tajemná kniha, kterou chci číst navždy. 📖✨",
-    "Jsi víc než krásná! 🌟 Tvá inteligence a charisma zářivě osvětlují každou místnost. Jsi jako vzácné umělecké dílo - jedinečná a nenapodobitelná. Svět je díky tobě krásnější. 🌈",
+    "Jsi víc než krásná! 🌈 Tvá inteligence a charisma zářivě osvětlují každou místnost. Jsi jako vzácné umělecké dílo - jedinečná a nenapodobitelná. Svět je díky tobě krásnější. 🌈",
     "Neuvěřitelná krásko! 💓 Tvá energie je nakažlivá a tvůj duch nezlomný. Jsi jako ranní rosa - svěží, čistá a dokonalá. Každý tvůj krok zanechává stopu v mém srdci. 👣",
     "Moje všechno! 💝 Jsi začátek i konec mých dnů, píseň, která hraje v mém srdci. Tvá duše je čistá jako křišťálový potok a tvá mysl fascinující jako nejhlubší oceán. 🌊",
     "Božská ženo! 👑 Jsi dokonalá kombinace síly a něžnosti, moudrosti a hravosti. Tvá přítomnost je jako parfém, který omámí smysly a zůstane v paměti navždy. 🌺"
