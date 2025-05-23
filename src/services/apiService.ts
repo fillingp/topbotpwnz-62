@@ -1,5 +1,6 @@
+
 // API services for various endpoints
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from "@google/generative-ai";
 
 export const callGeminiAPI = async (message: string, conversationHistory: any[]): Promise<string> => {
   try {
@@ -42,8 +43,8 @@ Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každ
       },
       safetySettings: [
         {
-          category: "HARM_CATEGORY_HARASSMENT",
-          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }
       ]
     });
