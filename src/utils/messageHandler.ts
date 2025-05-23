@@ -1,18 +1,19 @@
-
 import { Message } from '@/types/chat';
-import { callGeminiAPI, callPerplexityAPI, callSerperAPI } from '@/services/apiService';
+import { callGeminiAPI, callPerplexityAPI, callSerperAPI, performWebSearch } from '@/services/apiService';
 import { analyzeImage, formatAnalysisResult, ImageAnalysisResult } from './imageAnalysisService';
+import { synthesizeSpeech, playAudio } from './speechService';
 
 export const shouldUsePerplexity = (message: string): boolean => {
   const perplexityKeywords = [
     'analýza', 'výzkum', 'studie', 'statistiky', 'data', 'trendy',
     'aktuální', 'nejnovější', 'zprávy', 'současnost', 'vývoj',
-    'porovnání', 'hloubková', 'detailní', 'komplexní'
+    'porovnání', 'hloubková', 'detailní', 'komplexní', 'vyhledej',
+    'najdi', 'informace', 'co je', 'kdo je', 'historie'
   ];
   
   return perplexityKeywords.some(keyword => 
     message.toLowerCase().includes(keyword)
-  ) || message.length > 100;
+  ) || message.length > 100 || message.endsWith('?');
 };
 
 export const generateAIResponse = async (input: string, currentMessages: Message[]): Promise<string> => {
@@ -21,23 +22,30 @@ export const generateAIResponse = async (input: string, currentMessages: Message
     
     if (shouldUsePerplexity(input)) {
       try {
-        aiResponse = await callPerplexityAPI(input);
+        aiResponse = await performWebSearch(input);
       } catch (error) {
-        console.log('Perplexity nedostupná, přepínám na Serper...');
-        try {
-          const serperData = await callSerperAPI(input);
-          aiResponse = await callGeminiAPI(`Na základě těchto informací: ${serperData}\n\nOdpověz na dotaz: ${input}`, currentMessages);
-        } catch (serperError) {
-          console.log('Serper také nedostupný, používám jen Gemini...');
-          aiResponse = await callGeminiAPI(input, currentMessages);
-        }
+        console.log('Web search failed, falling back to Gemini...', error);
+        aiResponse = await callGeminiAPI(input, currentMessages);
       }
     } else {
       aiResponse = await callGeminiAPI(input, currentMessages);
     }
     
-    // Zajistíme, že odpověď obsahuje emotikony
+    // Ensure the response contains emoticons
     aiResponse = ensureEmojis(aiResponse);
+    
+    // Optional: Synthesize speech for the response if needed
+    // Uncomment if you want to automatically speak all AI responses
+    /*
+    try {
+      const ttsResult = await synthesizeSpeech(aiResponse.slice(0, 200), 'FEMALE');
+      if (ttsResult.success) {
+        playAudio(ttsResult.audio);
+      }
+    } catch (e) {
+      console.error("Error synthesizing speech:", e);
+    }
+    */
     
     return aiResponse;
   } catch (error) {
@@ -89,5 +97,30 @@ export const processImageAnalysis = async (imageData: string): Promise<string> =
   } catch (error) {
     console.error('Chyba při zpracování analýzy obrázku:', error);
     return "Bohužel došlo k chybě při analýze obrázku. 😞 Zkuste to prosím znovu později.";
+  }
+};
+
+// Function to synthesize and play speech for a given text
+export const speakText = async (text: string, voiceType: 'FEMALE' | 'MALE' = 'FEMALE'): Promise<boolean> => {
+  try {
+    // Clean the text for TTS (remove markdown, etc.)
+    const cleanText = text
+      .replace(/#{1,6} /g, '') // Remove markdown headers
+      .replace(/\*\*/g, '')    // Remove bold markers
+      .replace(/\*/g, '')      // Remove italic markers
+      .replace(/```[^`]*```/g, 'code block')  // Replace code blocks
+      .replace(/`[^`]*`/g, '')  // Remove inline code
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // Replace markdown links with just the text
+      .slice(0, 4000);  // Limit text length
+
+    const ttsResult = await synthesizeSpeech(cleanText, voiceType);
+    if (ttsResult.success) {
+      await playAudio(ttsResult.audio);
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Chyba při syntéze řeči:', error);
+    return false;
   }
 };

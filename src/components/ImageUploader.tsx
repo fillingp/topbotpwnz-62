@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Image as ImageIcon, CheckCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
 interface ImageUploaderProps {
@@ -12,6 +12,9 @@ interface ImageUploaderProps {
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, onClose }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<string | null>(null);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -52,15 +55,39 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, onClose 
       return;
     }
     
+    setFileName(file.name);
+    setFileSize(formatFileSize(file.size));
+    setIsProcessing(true);
+    
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
         const imageData = event.target.result as string;
         setPreviewImage(imageData);
-        onImageSelected(imageData);
+        setIsProcessing(false);
       }
     };
+    
+    reader.onerror = () => {
+      toast.error("Chyba při čtení souboru. Zkuste to znovu.");
+      setIsProcessing(false);
+    };
+    
     reader.readAsDataURL(file);
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return bytes + ' B';
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    else return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const handleAnalyze = () => {
+    if (previewImage) {
+      onImageSelected(previewImage);
+    } else {
+      toast.error("Nejdříve musíte vybrat obrázek k analýze.");
+    }
   };
 
   return (
@@ -72,8 +99,33 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, onClose 
         </div>
         
         {previewImage ? (
-          <div className="mb-4">
-            <img src={previewImage} alt="Preview" className="w-full h-auto rounded-md" />
+          <div className="space-y-4">
+            <div className="relative">
+              <img 
+                src={previewImage} 
+                alt="Preview" 
+                className="w-full h-auto max-h-80 object-contain rounded-md border border-slate-600"
+              />
+              <Button 
+                variant="outline" 
+                size="icon"
+                className="absolute top-2 right-2 bg-slate-800/80 hover:bg-slate-700"
+                onClick={() => {
+                  setPreviewImage(null);
+                  setFileName(null);
+                  setFileSize(null);
+                }}
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </div>
+            
+            {fileName && fileSize && (
+              <div className="text-sm text-slate-300">
+                <p className="truncate">{fileName}</p>
+                <p>{fileSize}</p>
+              </div>
+            )}
           </div>
         ) : (
           <div 
@@ -85,8 +137,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, onClose 
             onDrop={handleDrop}
             onClick={() => document.getElementById('file-input')?.click()}
           >
-            <ImageIcon className="mx-auto h-12 w-12 text-slate-400 mb-2" />
-            <p className="text-slate-300">Přetáhni obrázek sem nebo klikni pro výběr</p>
+            {isProcessing ? (
+              <div className="flex flex-col items-center">
+                <RefreshCw className="h-12 w-12 text-purple-400 animate-spin mb-2" />
+                <p className="text-slate-300">Zpracovávám obrázek...</p>
+              </div>
+            ) : (
+              <>
+                <ImageIcon className="mx-auto h-12 w-12 text-slate-400 mb-2" />
+                <p className="text-slate-300 mb-2">Přetáhni obrázek sem nebo klikni pro výběr</p>
+                <p className="text-xs text-slate-400">Podporované formáty: JPG, PNG, WEBP, GIF</p>
+                <p className="text-xs text-slate-400">Max velikost: 5MB</p>
+              </>
+            )}
             <input
               type="file"
               id="file-input"
@@ -107,15 +170,20 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, onClose 
           </Button>
           <Button 
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            onClick={() => {
-              if (previewImage) {
-                onClose();
-              } else {
-                document.getElementById('file-input')?.click();
-              }
-            }}
+            onClick={previewImage ? handleAnalyze : () => document.getElementById('file-input')?.click()}
+            disabled={isProcessing}
           >
-            {previewImage ? 'Analyzovat' : 'Vybrat obrázek'}
+            {previewImage ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-1" /> 
+                Analyzovat
+              </>
+            ) : (
+              <>
+                <Upload className="w-4 h-4 mr-1" />
+                Vybrat obrázek
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -124,4 +192,3 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageSelected, onClose 
 };
 
 export default ImageUploader;
-

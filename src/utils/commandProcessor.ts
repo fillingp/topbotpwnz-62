@@ -1,10 +1,12 @@
 
 import { analyzeImage } from './imageAnalysisService';
+import { speakText } from './messageHandler';
 
 type CommandResult = {
   content: string;
   type: 'text' | 'map' | 'weather' | 'image' | 'error';
   data?: any;
+  speak?: boolean; // Whether to speak the result
 };
 
 // Seznam příkazů pro nápovědu
@@ -26,6 +28,7 @@ export const availableCommands = [
   { command: "/help", description: "Seznam všech příkazů 📝" },
   { command: "/shell", description: "Spustí virtuální shell pro příkazy 💻" },
   { command: "/clear", description: "Vymaže aktuální konverzaci 🧹" },
+  { command: "/speak [text]", description: "Přečte text nahlas 🔊" },
 ];
 
 export async function processCommand(command: string): Promise<CommandResult> {
@@ -51,10 +54,14 @@ export async function processCommand(command: string): Promise<CommandResult> {
       };
       
     case '/joke':
-      return {
+      const jokeResponse = {
         content: await generateJoke(),
-        type: 'text'
+        type: 'text' as const,
+        speak: true
       };
+      // Auto-speak jokes
+      speakText(jokeResponse.content, 'MALE');
+      return jokeResponse;
       
     case '/weather':
       if (!args) return { content: "Ty vole, a kde jako? Zadej místo, ne?! 🙄", type: 'error' };
@@ -80,20 +87,41 @@ export async function processCommand(command: string): Promise<CommandResult> {
       };
       
     case '/forhim':
-      return {
+      const forHimResponse = {
         content: generateForHimMessage(),
-        type: 'text'
+        type: 'text' as const,
+        speak: true
       };
+      // Auto-speak the message
+      speakText(forHimResponse.content, 'FEMALE');
+      return forHimResponse;
       
     case '/forher':
-      return {
+      const forHerResponse = {
         content: generateForHerMessage(),
-        type: 'text'
+        type: 'text' as const,
+        speak: true
       };
+      // Auto-speak the message
+      speakText(forHerResponse.content, 'MALE');
+      return forHerResponse;
 
     case '/clear':
       return {
         content: "Konverzace byla vymazána. 🧹",
+        type: 'text'
+      };
+      
+    case '/speak':
+      if (!args) return { content: "A co jako mám říct? Zadej nějaký text! 🔊", type: 'error' };
+      
+      // Try to speak the provided text
+      const spoken = await speakText(args, 'FEMALE');
+      
+      return {
+        content: spoken 
+          ? `Přečetl jsem: "${args}" 🔊` 
+          : "Nepodařilo se přečíst text. Zkuste to znovu. 😔",
         type: 'text'
       };
 
@@ -128,7 +156,12 @@ async function generateJoke(): Promise<string> {
     "Jaký je rozdíl mezi programátorem a Bohem? Bůh si nemyslí, že je programátor. 🧙‍♂️",
     "Proč se programátoři bojí přírody? Tam není Wi-Fi! 🌳📵",
     "Co dostaneš, když zkřížíš programátora s filozofem? Někoho, kdo stále hledá bug v existenci. 🤔",
-    "Jak poznáš extrovertního programátora? Při rozhovoru se dívá na TVOJE boty! 👞"
+    "Jak poznáš extrovertního programátora? Při rozhovoru se dívá na TVOJE boty! 👞",
+    "Proč programátoři nemají rádi přírodu? Má příliš mnoho bugů! 🐞",
+    "Proč si programátor nemohl najít dívku? Protože nepochopil kontext! 🤦‍♂️",
+    "Programátor jde do obchodu: 'Měli byste mléko?' Prodavač: 'Ano'. Programátor: 'Super, tak já si vezmu čaj.' ☕",
+    "Programátorova žena mu říká: 'Běž do obchodu a kup 1 bochník chleba. Pokud mají vejce, kup 12.' Programátor přijde domů s 12 bochníky chleba a říká: 'Měli vejce!' 🍞",
+    "Víte proč se programátoři modlí? Protože doufají, že existuje něco většího než NullPointerException! 🙏"
   ];
   
   return jokes[Math.floor(Math.random() * jokes.length)];
@@ -143,7 +176,11 @@ function generateForHerMessage(): string {
     "Lásko moje! 💕 Jsi jako vzácný diamant - neporovnatelná a nepřekonatelná. Tvá síla a elegance mě každý den ohromují. Jsi jako kouzlo, které nikdy nepřestává fascinovat. 💎",
     "Má nejkrásnější! 🌺 Tvá něžnost léčí zlomená srdce a tvá odvaha inspiruje ostatní. Jsi jako kouzelná zahrada plná divů, které čekají na objevení. Každý den s tebou je dar. 🎁",
     "Ty jsi ta pravá! 💖 Tvá inteligence a charisma zářivě osvětlují každou místnost. Jsi jako vzácné umělecké dílo - jedinečná a nenapodobitelná. Svět je díky tobě krásnější. 🌈",
-    "Nádherná ženo! 🌹 Tvá vášeň je jako oheň, který nikdy neuhasne. Jsi jako tajemná kniha, kterou chci číst znovu a znovu. Každá kapitola odhaluje nové kouzlo. 📖✨"
+    "Nádherná ženo! 🌹 Tvá vášeň je jako oheň, který nikdy neuhasne. Jsi jako tajemná kniha, kterou chci číst znovu a znovu. Každá kapitola odhaluje nové kouzlo. 📖✨",
+    "Jsi víc než krásná! 🌟 Tvůj smysl pro humor a inteligence mě přitahují jako magnet. S tebou každý moment stojí za to. Tvé oči jsou jako hvězdy, které vedou mou cestu. ⭐",
+    "Neuvěřitelná krásko! 💓 Tvá energie je nakažlivá a tvůj duch nezlomný. Jsi jako ranní rosa - svěží, čistá a dokonalá. Každý tvůj krok zanechává stopu v mém srdci. 👣",
+    "Moje všechno! 💝 Jsi začátek i konec mých dnů, píseň, která hraje v mém srdci. Tvá duše je čistá jako křišťálový potok a tvá mysl fascinující jako nejhlubší oceán. 🌊",
+    "Božská ženo! 👑 Jsi dokonalá kombinace síly a něžnosti, moudrosti a hravosti. Tvá přítomnost je jako parfém, který omámí smysly a zůstane v paměti navždy. 🌺"
   ];
   
   return messages[Math.floor(Math.random() * messages.length)];
@@ -158,7 +195,11 @@ function generateForHimMessage(): string {
     "Drahý muži! 🌟 Tvá inteligence a smysl pro humor mě nepřestávají udivovat. S tebou je každý den dobrodružstvím plným smíchu a radosti. 😄",
     "Můj miláčku! 💫 Jsi jako vzácné víno - s věkem jen lepšíš. Tvá zralost a klid jsou jako kotva v rozbouřeném moři života. 🍷",
     "Ty jsi ten pravý! 💙 Tvá vášeň a cílevědomost jsou nakažlivé. Inspiruješ mě být lepší verzí sebe sama každý den. S tebou je život vzrušující cesta. 🚀",
-    "Můj úžasný muži! ⭐ Tvá pracovitost a oddanost rodině jsou obdivuhodné. Jsi pilířem síly a zdrojem nekonečné podpory. Jsi nenahraditelný. 🏡❤️"
+    "Můj úžasný muži! ⭐ Tvá pracovitost a oddanost rodině jsou obdivuhodné. Jsi pilířem síly a zdrojem nekonečné podpory. Jsi nenahraditelný. 🏡❤️",
+    "Drahý hrdino mého příběhu! 🌠 Tvá odvaha čelit výzvám a tvá schopnost řešit problémy jsou obdivuhodné. Jsi jako kapitán, který bezpečně řídí loď i v bouři. ⚓",
+    "Můj dokonalý partnere! 💎 Tvá intuice a schopnost porozumět mi bez slov mě každý den udivuje. Jsi jako kniha, kterou chci číst navždy. 📚",
+    "Jedinečný muži! 🌈 Tvá kreativita a vášeň pro život jsou jako ohňostroj - oslnivé a nezapomenutelné. S tebou je každý moment plný barev a energie. 🎨",
+    "Má životní lásko! 💞 Tvá oddanost a péče jsou jako teplý plášť v chladném dni. Jsi jako hvězda na mém nebi - jasná, zářivá a věčná. ⭐"
   ];
   
   return messages[Math.floor(Math.random() * messages.length)];

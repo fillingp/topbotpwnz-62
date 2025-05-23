@@ -81,7 +81,7 @@ export const callPerplexityAPI = async (message: string): Promise<string> => {
         messages: [
           {
             role: 'system',
-            content: 'Jsi TopBot.PwnZ, pokročilý český AI asistent vytvořený Františkem Kaláškem. Odpovídáš výhradně v češtině s detailními, přesnými informacemi. Využívej aktuální data a poskytuj hloubkovou analýzu.'
+            content: 'Jsi TopBot.PwnZ, pokročilý český AI asistent vytvořený Františkem Kaláškem. Odpovídáš výhradně v češtině s detailními, přesnými informacemi. Využívej aktuální data a poskytuj hloubkovou analýzu. Používej emotikony pro oživení textu.'
           },
           {
             role: 'user',
@@ -92,7 +92,7 @@ export const callPerplexityAPI = async (message: string): Promise<string> => {
         top_p: 0.9,
         max_tokens: 2000,
         return_images: false,
-        return_related_questions: false,
+        return_related_questions: true,
         frequency_penalty: 1,
         presence_penalty: 0
       }),
@@ -105,8 +105,20 @@ export const callPerplexityAPI = async (message: string): Promise<string> => {
     const data = await response.json();
     console.log('Perplexity odpověď:', data);
     
+    let result = '';
+    
     if (data.choices && data.choices[0] && data.choices[0].message) {
-      return data.choices[0].message.content;
+      result = data.choices[0].message.content;
+      
+      // If there are related questions, add them to the response
+      if (data.related_questions && data.related_questions.length > 0) {
+        result += "\n\n## Související dotazy 🔍\n";
+        data.related_questions.forEach((question: string, index: number) => {
+          result += `${index + 1}. ${question}\n`;
+        });
+      }
+      
+      return result;
     } else {
       throw new Error('Neplatná odpověď z Perplexity API');
     }
@@ -129,7 +141,11 @@ export const callSerperAPI = async (message: string): Promise<string> => {
       body: JSON.stringify({
         q: message,
         gl: 'cz',
-        hl: 'cs'
+        hl: 'cs',
+        num: 5, // Increased number of results
+        includeAnswer: true,
+        includeImages: true,
+        includeSearchFeatures: true
       }),
     });
 
@@ -140,17 +156,67 @@ export const callSerperAPI = async (message: string): Promise<string> => {
     const data = await response.json();
     console.log('Serper odpověď:', data);
     
-    let result = "Zde jsou nejnovější informace z internetu:\n\n";
+    let result = "# Výsledky hledání 🌐\n\n";
     
-    if (data.organic) {
-      data.organic.slice(0, 3).forEach((item: any, index: number) => {
-        result += `${index + 1}. **${item.title}**\n${item.snippet}\n${item.link}\n\n`;
+    // Add featured snippet if available
+    if (data.answerBox && data.answerBox.answer) {
+      result += `## Rychlá odpověď ⚡\n${data.answerBox.answer}\n\n`;
+    } else if (data.answerBox && data.answerBox.snippet) {
+      result += `## Výňatek ⚡\n${data.answerBox.snippet}\n\n`;
+    }
+    
+    // Add knowledge graph if available
+    if (data.knowledgeGraph) {
+      result += `## ${data.knowledgeGraph.title || 'Informace'} 📚\n`;
+      result += `${data.knowledgeGraph.description || ''}\n\n`;
+    }
+    
+    // Add organic search results
+    if (data.organic && data.organic.length > 0) {
+      result += "## Výsledky z webu 🔍\n\n";
+      data.organic.slice(0, 5).forEach((item: any, index: number) => {
+        result += `### ${index + 1}. ${item.title}\n${item.snippet}\n${item.link}\n\n`;
       });
+    }
+    
+    // Add related searches if available
+    if (data.relatedSearches && data.relatedSearches.length > 0) {
+      result += "## Související vyhledávání 🔎\n";
+      data.relatedSearches.slice(0, 5).forEach((item: string, index: number) => {
+        result += `${index + 1}. ${item}\n`;
+      });
+      result += "\n";
     }
     
     return result;
   } catch (error) {
     console.error('Chyba Serper API:', error);
+    throw error;
+  }
+};
+
+// New function to perform web search with fallbacks
+export const performWebSearch = async (query: string): Promise<string> => {
+  try {
+    // First try Perplexity
+    try {
+      return await callPerplexityAPI(query);
+    } catch (perplexityError) {
+      console.log('Perplexity API selhala, přepínám na Serper...', perplexityError);
+      
+      // Then try Serper
+      try {
+        const serperData = await callSerperAPI(query);
+        // If Serper succeeds but we want enhanced results, use Gemini to format them
+        return await callGeminiAPI(`Na základě těchto informací: ${serperData}\n\nVytvoř kompletní, informativní odpověď na dotaz: ${query}`, []);
+      } catch (serperError) {
+        console.log('Serper API také selhala, používám pouze Gemini...', serperError);
+        // Last resort, just use Gemini
+        return await callGeminiAPI(`Potřebuji informace o: ${query}. Poskytni mi co nejvíce relevantních informací.`, []);
+      }
+    }
+  } catch (error) {
+    console.error('Chyba při vyhledávání na webu:', error);
     throw error;
   }
 };

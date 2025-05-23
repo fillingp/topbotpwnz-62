@@ -8,6 +8,8 @@ type KeyboardShortcutProps = {
   onForHim?: () => void;
   onImageAnalysis: () => void;
   onClearChat: () => void;
+  onSpeechToText?: () => void;  // New feature for speech recognition
+  onSearchWeb?: () => void;     // New feature for web search
 };
 
 export const useKeyboardShortcuts = ({
@@ -17,6 +19,8 @@ export const useKeyboardShortcuts = ({
   onForHim,
   onImageAnalysis,
   onClearChat,
+  onSpeechToText,
+  onSearchWeb
 }: KeyboardShortcutProps) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -55,6 +59,18 @@ export const useKeyboardShortcuts = ({
             onClearChat();
             event.preventDefault();
             break;
+          case 's':
+            if (onSpeechToText) {
+              onSpeechToText();
+              event.preventDefault();
+            }
+            break;
+          case 'w':
+            if (onSearchWeb) {
+              onSearchWeb();
+              event.preventDefault();
+            }
+            break;
         }
       }
     };
@@ -64,5 +80,5 @@ export const useKeyboardShortcuts = ({
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onHelp, onJoke, onForHer, onForHim, onImageAnalysis, onClearChat]);
+  }, [onHelp, onJoke, onForHer, onForHim, onImageAnalysis, onClearChat, onSpeechToText, onSearchWeb]);
 };

@@ -1,14 +1,21 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Camera, Laugh, Heart, Sparkles, Smile } from "lucide-react";
+import { Camera, Laugh, Heart, Sparkles, Smile, Mic, Search, Image } from "lucide-react";
 
 interface QuickCommandsProps {
   onCommandSelected: (command: string) => void;
   onImageAnalysisRequested: () => void;
+  onSpeechToTextRequested?: () => void;
+  onWebSearchRequested?: () => void;
 }
 
-const QuickCommands: React.FC<QuickCommandsProps> = ({ onCommandSelected, onImageAnalysisRequested }) => {
+const QuickCommands: React.FC<QuickCommandsProps> = ({ 
+  onCommandSelected, 
+  onImageAnalysisRequested,
+  onSpeechToTextRequested,
+  onWebSearchRequested
+}) => {
   return (
     <div className="flex flex-wrap gap-2 mb-2 px-4">
       <Button 
@@ -57,9 +64,33 @@ const QuickCommands: React.FC<QuickCommandsProps> = ({ onCommandSelected, onImag
         className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white"
         onClick={() => onImageAnalysisRequested()}
       >
-        <Camera className="w-4 h-4 mr-1" />
+        <Image className="w-4 h-4 mr-1" />
         Analýza obrázku
       </Button>
+      
+      {onSpeechToTextRequested && (
+        <Button 
+          variant="outline"
+          size="sm"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white"
+          onClick={() => onSpeechToTextRequested()}
+        >
+          <Mic className="w-4 h-4 mr-1" />
+          Hlasový vstup
+        </Button>
+      )}
+      
+      {onWebSearchRequested && (
+        <Button 
+          variant="outline"
+          size="sm"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white"
+          onClick={() => onWebSearchRequested()}
+        >
+          <Search className="w-4 h-4 mr-1" />
+          Vyhledat na webu
+        </Button>
+      )}
     </div>
   );
 };
