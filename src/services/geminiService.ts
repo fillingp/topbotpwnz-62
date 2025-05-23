@@ -5,9 +5,6 @@ import {
   HarmBlockThreshold
 } from '@google/generative-ai';
 
-// We don't need dual imports - we'll just use the main GoogleGenerativeAI library
-// Remove the incorrect import and just rely on the one above
-
 const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
 
 export const callGeminiAPI = async (message: string, conversationHistory: any[]): Promise<string> => {
@@ -152,7 +149,7 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
   }
 };
 
-// Fixed function for generating images with Gemini API
+// Function for generating images with Gemini API
 export const generateImageWithGemini = async (prompt: string): Promise<string> => {
   try {
     console.log("Generuji obrázek pomocí Gemini API:", prompt);
@@ -164,11 +161,10 @@ export const generateImageWithGemini = async (prompt: string): Promise<string> =
 
     // Use the image generation model
     const imageModel = genAI.getGenerativeModel({ 
-      model: "gemini-2.0-flash-preview-image-generation"
+      model: "gemini-2.0-flash-preview-image-generation" 
     });
     
-    // Generate the image content - use the proper API format
-    // We need to avoid using responseMultimodalOutputs which is not valid
+    // Generate the image content
     const result = await imageModel.generateContent({
       contents: [{ role: "user", parts: [{ text: czechPrompt }] }]
     });
@@ -190,7 +186,7 @@ export const generateImageWithGemini = async (prompt: string): Promise<string> =
   }
 };
 
-// Fixed function for structured responses
+// Function for structured responses
 export const getStructuredResponseFromGemini = async <T>(prompt: string, schema: any): Promise<T> => {
   try {
     console.log("Získávám strukturovanou odpověď z Gemini API:", prompt);
