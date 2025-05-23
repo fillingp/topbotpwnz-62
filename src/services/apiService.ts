@@ -6,6 +6,11 @@ export {
   analyzeImageWithGemini 
 } from './geminiService';
 
+export {
+  streamGeminiAudio,
+  playAudioBuffer
+} from './geminiAudioService';
+
 export { 
   callPerplexityAPI 
 } from './perplexityService';
@@ -19,8 +24,11 @@ export {
 } from './searchService';
 
 // Export the image analysis services 
-export { 
-  analyzeImage, 
-  formatAnalysisResult, 
-  type ImageAnalysisResult 
+export type { 
+  ImageAnalysisResult 
+} from '../utils/imageAnalysis/types';
+
+export {
+  analyzeImage,
+  formatAnalysisResult
 } from '../utils/imageAnalysis';

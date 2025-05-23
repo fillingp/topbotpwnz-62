@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bot, User, Loader2 } from "lucide-react";
 import ReactMarkdown from 'react-markdown';
 import { Message } from '@/types/chat';
+import GeminiAudioPlayer from './GeminiAudioPlayer';
 
 interface ChatMessageProps {
   message: Message;
@@ -44,11 +45,17 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                 <ReactMarkdown>{message.content}</ReactMarkdown>
               </div>
             )}
-            <div className="text-xs opacity-70 mt-2">
-              {message.timestamp.toLocaleTimeString('cs-CZ', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}
+            <div className="flex justify-between items-center mt-2">
+              <div className="text-xs opacity-70">
+                {message.timestamp.toLocaleTimeString('cs-CZ', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </div>
+              
+              {message.role === 'assistant' && !message.isTyping && (
+                <GeminiAudioPlayer text={message.content} />
+              )}
             </div>
           </CardContent>
         </Card>
