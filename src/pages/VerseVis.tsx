@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,21 +13,6 @@ import {
   HarmBlockThreshold
 } from '@google/generative-ai';
 import { GOOGLE_API_KEY } from '@/services/gemini/config';
-
-// Safety settings types
-const HarmCategory = {
-  HARM_CATEGORY_HARASSMENT: 'HARM_CATEGORY_HARASSMENT',
-  HARM_CATEGORY_HATE_SPEECH: 'HARM_CATEGORY_HATE_SPEECH',
-  HARM_CATEGORY_SEXUALLY_EXPLICIT: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-  HARM_CATEGORY_DANGEROUS_CONTENT: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-};
-
-const HarmBlockThreshold = {
-  BLOCK_NONE: 'BLOCK_NONE',
-  BLOCK_LOW_AND_ABOVE: 'BLOCK_LOW_AND_ABOVE',
-  BLOCK_MEDIUM_AND_ABOVE: 'BLOCK_MEDIUM_AND_ABOVE',
-  BLOCK_HIGH_AND_ABOVE: 'BLOCK_HIGH_AND_ABOVE',
-};
 
 const VerseVis: React.FC = () => {
   const [input, setInput] = useState("");
@@ -114,7 +100,7 @@ const VerseVis: React.FC = () => {
 
       const promptPart = { text: input };
       
-      // Proper type usage for generateContent with safetySettings
+      // Use proper enum types for safety settings
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [promptPart, imagePart] }],
         generationConfig: {
