@@ -209,6 +209,7 @@ export function useChatMessages() {
   
   return {
     isLoading,
+    setIsLoading,
     handleSend,
     handleCommand,
     handleImageAnalysis,
@@ -217,6 +218,7 @@ export function useChatMessages() {
     getCurrentMessages,
     setCurrentConversation,
     deleteConversation,
-    createNewConversation
+    createNewConversation,
+    updateConversation
   };
 }

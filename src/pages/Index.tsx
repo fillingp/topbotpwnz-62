@@ -20,6 +20,7 @@ const Index = () => {
   
   const {
     isLoading,
+    setIsLoading,
     handleSend,
     handleCommand,
     handleImageAnalysis,
@@ -130,7 +131,7 @@ const Index = () => {
           messages={messages}
           currentConversation={currentConversation}
           updateConversation={updateConversation}
-          setIsLoading={isLoading => setIsLoading}
+          setIsLoading={setIsLoading}
         />
         
         {/* Modal pro nahrání obrázku */}

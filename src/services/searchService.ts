@@ -59,4 +59,3 @@ export const performWebSearch = async (query: string): Promise<string> => {
     return `Bohužel nastala neočekávaná chyba při vyhledávání "${query}". Zkuste to prosím znovu později. 😔`;
   }
 };
-
