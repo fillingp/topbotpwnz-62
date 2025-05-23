@@ -1,5 +1,5 @@
 
-import { analyzeImage } from './imageAnalysisService';
+import { analyzeImage } from '../services/apiService';
 import { speakText } from './messageHandler';
 import { toast } from 'sonner';
 

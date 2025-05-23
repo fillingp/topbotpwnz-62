@@ -32,5 +32,5 @@ export const analyzeImage = async (imageData: string): Promise<ImageAnalysisResu
 };
 
 // Export everything needed for the image analysis service
-export { ImageAnalysisResult } from "./types";
+export type { ImageAnalysisResult } from "./types";
 export { formatAnalysisResult } from "./formatter";
