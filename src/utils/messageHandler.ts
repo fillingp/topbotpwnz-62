@@ -1,4 +1,3 @@
-
 import { Message } from '@/types/chat';
 import { callGeminiAPI, callPerplexityAPI, callSerperAPI, performWebSearch } from '@/services/apiService';
 import { analyzeImage, formatAnalysisResult, ImageAnalysisResult } from './imageAnalysisService';
@@ -9,8 +8,7 @@ export const shouldUsePerplexity = (message: string): boolean => {
     'analýza', 'výzkum', 'studie', 'statistiky', 'data', 'trendy',
     'aktuální', 'nejnovější', 'zprávy', 'současnost', 'vývoj',
     'porovnání', 'hloubková', 'detailní', 'komplexní', 'vyhledej',
-    'najdi', 'informace', 'co je', 'kdo je', 'historie', 'jak',
-    'proč', 'kdy', 'kde', 'kolik', 'jaký', 'jaká', 'jaké', 'kteří'
+    'najdi', 'informace', 'co je', 'kdo je', 'historie'
   ];
   
   return perplexityKeywords.some(keyword => 
@@ -18,29 +16,36 @@ export const shouldUsePerplexity = (message: string): boolean => {
   ) || message.length > 100 || message.endsWith('?');
 };
 
-export const generateAIResponse = async (
-  input: string, 
-  currentMessages: Message[],
-  updateStreamingResponse?: (partialResponse: string) => void
-): Promise<string> => {
+export const generateAIResponse = async (input: string, currentMessages: Message[]): Promise<string> => {
   try {
-    let aiResponse: string = '';
+    let aiResponse: string;
     
     if (shouldUsePerplexity(input)) {
       try {
-        aiResponse = await performWebSearch(input, updateStreamingResponse);
+        aiResponse = await performWebSearch(input);
       } catch (error) {
         console.log('Web search failed, falling back to Gemini...', error);
-        aiResponse = await callGeminiAPI(input, currentMessages, updateStreamingResponse);
+        aiResponse = await callGeminiAPI(input, currentMessages);
       }
     } else {
-      aiResponse = await callGeminiAPI(input, currentMessages, updateStreamingResponse);
+      aiResponse = await callGeminiAPI(input, currentMessages);
     }
     
-    // Ensure the response contains emoticons (if not streaming)
-    if (!updateStreamingResponse) {
-      aiResponse = ensureEmojis(aiResponse);
+    // Ensure the response contains emoticons
+    aiResponse = ensureEmojis(aiResponse);
+    
+    // Optional: Synthesize speech for the response if needed
+    // Uncomment if you want to automatically speak all AI responses
+    /*
+    try {
+      const ttsResult = await synthesizeSpeech(aiResponse.slice(0, 200), 'FEMALE');
+      if (ttsResult.success) {
+        playAudio(ttsResult.audio);
+      }
+    } catch (e) {
+      console.error("Error synthesizing speech:", e);
     }
+    */
     
     return aiResponse;
   } catch (error) {
@@ -117,44 +122,5 @@ export const speakText = async (text: string, voiceType: 'FEMALE' | 'MALE' = 'FE
   } catch (error) {
     console.error('Chyba při syntéze řeči:', error);
     return false;
-  }
-};
-
-// Detect code blocks and highlight them
-export const processCodeBlocks = (text: string): {formattedText: string, hasCode: boolean} => {
-  let hasCode = false;
-  
-  // Replace code blocks with highlighted versions
-  const formattedText = text.replace(/```([a-z]*)\n([\s\S]*?)```/g, (match, language, code) => {
-    hasCode = true;
-    return `<div class="code-block ${language}">${language ? `<div class="code-language">${language}</div>` : ''}${code}</div>`;
-  });
-  
-  // Also handle inline code
-  const withInlineCode = formattedText.replace(/`([^`]+)`/g, (match, code) => {
-    hasCode = true;
-    return `<code>${code}</code>`;
-  });
-  
-  return {
-    formattedText: withInlineCode,
-    hasCode
-  };
-};
-
-// Generate code based on user description
-export const generateCode = async (description: string): Promise<string> => {
-  try {
-    // Use Gemini API to generate code based on description
-    const prompt = `Vytvoř kód podle tohoto popisu: ${description}. 
-    Odpověď formátuj jako markdown s kódem v code blocích se správným jazykem. 
-    Přidej komentáře pro vysvětlení složitějších částí kódu. 
-    Odpověz pouze kódem a vysvětlením kódu v češtině, bez úvodu nebo závěru.`;
-    
-    const response = await callGeminiAPI(prompt, []);
-    return response;
-  } catch (error) {
-    console.error('Chyba při generování kódu:', error);
-    return "Bohužel došlo k chybě při generování kódu. Zkuste to prosím znovu.";
   }
 };

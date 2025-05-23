@@ -7,20 +7,18 @@ import ChatInput from "@/components/ChatInput";
 import ChatMessageList from "@/components/ChatMessageList";
 import ConversationSidebar from "@/components/ConversationSidebar";
 import { useConversation } from "@/hooks/useConversation";
-import { generateAIResponse, processImageAnalysis, processCodeBlocks } from "@/utils/messageHandler";
+import { generateAIResponse, processImageAnalysis } from "@/utils/messageHandler";
 import { Message } from "@/types/chat";
 import ImageUploader from "@/components/ImageUploader";
 import QuickCommands from "@/components/QuickCommands";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import CameraCapture from "@/components/CameraCapture";
 import WelcomeBanner from "@/components/WelcomeBanner";
-import CodeGenerationModal from "@/components/CodeGenerationModal";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showImageUploader, setShowImageUploader] = useState(false);
   const [showCameraCapture, setShowCameraCapture] = useState(false);
-  const [showCodeGenerator, setShowCodeGenerator] = useState(false);
   const { toast: showToast } = useToast();
   const {
     conversations,
@@ -57,10 +55,8 @@ const Index = () => {
     const newMessages = [...currentMessages, userMessage];
     updateConversation(convId, newMessages);
 
-    // Add a typing message that will be updated with streaming content
-    const typingId = (Date.now() + 1).toString();
     const typingMessage: Message = {
-      id: typingId,
+      id: (Date.now() + 1).toString(),
       content: '',
       role: 'assistant',
       timestamp: new Date(),
@@ -71,56 +67,13 @@ const Index = () => {
     setIsLoading(true);
 
     try {
-      // Create a function to update the streaming response
-      const updateStreamingResponse = (partialResponse: string) => {
-        const updatedMessage = {
-          id: typingId,
-          content: partialResponse,
-          role: 'assistant' as const,
-          timestamp: new Date(),
-          isTyping: true
-        };
-        
-        const currentMsgs = getCurrentMessages();
-        const updatedMessages = currentMsgs.map(msg => 
-          msg.id === typingId ? updatedMessage : msg
-        );
-        
-        updateConversation(convId, updatedMessages);
-        
-        // Process code blocks in the streaming response
-        const { formattedText, hasCode } = processCodeBlocks(partialResponse);
-        if (hasCode) {
-          // If code is detected, temporarily update with formatted version for display
-          // Note: this is just for display while streaming, the actual content stored will be the markdown
-          const formattedMessage = {
-            ...updatedMessage,
-            content: formattedText,
-            hasFormattedContent: true
-          };
-          
-          const formattedMessages = currentMsgs.map(msg => 
-            msg.id === typingId ? formattedMessage : msg
-          );
-          
-          updateConversation(convId, formattedMessages);
-        }
-      };
-      
-      // Generate AI response with streaming
-      const aiResponse = await generateAIResponse(input.trim(), currentMessages, updateStreamingResponse);
+      const aiResponse = await generateAIResponse(input.trim(), currentMessages);
 
-      // Process code blocks in the final response
-      const { formattedText, hasCode } = processCodeBlocks(aiResponse);
-      
-      // Create final message
       const assistantMessage: Message = {
-        id: typingId,
+        id: (Date.now() + 2).toString(),
         content: aiResponse,
         role: 'assistant',
-        timestamp: new Date(),
-        // If code was detected, include the formatted version
-        ...(hasCode && { formattedContent: formattedText })
+        timestamp: new Date()
       };
 
       const finalMessages = [...newMessages, assistantMessage];
@@ -130,7 +83,7 @@ const Index = () => {
       toast.error("Nepodařilo se zpracovat vaši zprávu. Zkuste to prosím znovu.");
 
       const errorMessage: Message = {
-        id: typingId,
+        id: (Date.now() + 2).toString(),
         content: "Omlouvám se, ale došlo k chybě při zpracování vaší zprávy. Zkuste to prosím znovu. 😞",
         role: 'assistant',
         timestamp: new Date()
@@ -265,42 +218,16 @@ const Index = () => {
     }
   };
 
+  // Implement speech-to-text functionality
   const handleSpeechToText = () => {
     toast.info("Spouštím hlasový vstup...");
     // The functionality is already implemented in ChatInput component
   };
 
+  // Implement web search functionality
   const handleWebSearch = () => {
-    toast.info("Vyhledávám na webu...");
-    handleSend("Vyhledej nejnovější informace o umělé inteligenci");
-  };
-
-  const handleCodeGeneration = (generatedCode: string) => {
-    // Handle the generated code as a message from the assistant
-    let convId = currentConversation;
-    if (!convId) {
-      convId = createNewConversation();
-    }
-    
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content: "Vygeneruj kód",
-      role: 'user',
-      timestamp: new Date()
-    };
-    
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      content: generatedCode,
-      role: 'assistant',
-      timestamp: new Date(),
-      // Process code blocks for display
-      formattedContent: processCodeBlocks(generatedCode).formattedText
-    };
-    
-    const currentMessages = getCurrentMessages();
-    const newMessages = [...currentMessages, userMessage, assistantMessage];
-    updateConversation(convId, newMessages);
+    toast.info("Tato funkce ještě není plně implementována.");
+    // This would be implemented in a future update
   };
 
   // Klávesové zkratky
@@ -327,29 +254,23 @@ const Index = () => {
   const handleCameraRequest = () => {
     setShowCameraCapture(true);
   };
-  
-  const handleCodeGenerationRequest = () => {
-    setShowCodeGenerator(true);
-  };
 
   const messages = getCurrentMessages();
   const showWelcomeBanner = !messages.length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex flex-col md:flex-row">
-      {/* Sidebar s konverzacemi - hidden on mobile by default */}
-      <div className="hidden md:block">
-        <ConversationSidebar 
-          conversations={conversations}
-          currentConversation={currentConversation}
-          onCreateNew={createNewConversation}
-          onSelectConversation={setCurrentConversation}
-          onDeleteConversation={deleteConversation}
-        />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
+      {/* Sidebar s konverzacemi */}
+      <ConversationSidebar 
+        conversations={conversations}
+        currentConversation={currentConversation}
+        onCreateNew={createNewConversation}
+        onSelectConversation={setCurrentConversation}
+        onDeleteConversation={deleteConversation}
+      />
 
       {/* Hlavní chatová oblast */}
-      <div className="flex-1 flex flex-col h-screen">
+      <div className="flex-1 flex flex-col">
         <ChatHeader />
         
         {showWelcomeBanner ? (
@@ -373,7 +294,6 @@ const Index = () => {
           isLoading={isLoading} 
           onImageUploadRequested={handleImageUploadRequest}
           onCameraRequested={handleCameraRequest}
-          onCodeGenerationRequested={handleCodeGenerationRequest}
         />
         
         {/* Modal pro nahrání obrázku */}
@@ -389,14 +309,6 @@ const Index = () => {
           <CameraCapture
             onImageCaptured={handleImageAnalysis}
             onClose={() => setShowCameraCapture(false)}
-          />
-        )}
-        
-        {/* Modal pro generování kódu */}
-        {showCodeGenerator && (
-          <CodeGenerationModal
-            onCodeGenerated={handleCodeGeneration}
-            onClose={() => setShowCodeGenerator(false)}
           />
         )}
       </div>
