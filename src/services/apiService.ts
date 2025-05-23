@@ -49,7 +49,7 @@ Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každ
       },
       safetySettings: [
         {
-          category: HarmCategory.HARASSMENT,
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
           threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }
       ]
@@ -324,7 +324,7 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
       },
       safetySettings: [
         {
-          category: HarmCategory.HARASSMENT,
+          category: HarmCategory.HARM_CATEGORY_HARASSMENT,
           threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }
       ]
