@@ -3,11 +3,12 @@
   "name": "TopBot.PwnZ",
   "short_name": "TopBot.PwnZ",
   "description": "Extrémně pokročilý český AI asistent",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#6d28d9",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
+  "scope": "/",
   "icons": [
     {
       "src": "/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png",
@@ -20,6 +21,30 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "Nový chat",
+      "short_name": "Nový chat",
+      "description": "Zahájit novou konverzaci",
+      "url": "/?newChat=true",
+      "icons": [{ "src": "/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png", "sizes": "192x192" }]
     }
   ]
 }

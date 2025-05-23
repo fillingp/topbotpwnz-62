@@ -1,8 +1,10 @@
+
 import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { toast } from "sonner";
 import { processCommand } from "@/utils/commandProcessor";
 import ChatHeader from "@/components/ChatHeader";
+import MobileChatHeader from "@/components/MobileChatHeader";
 import ChatInput from "@/components/ChatInput";
 import ChatMessageList from "@/components/ChatMessageList";
 import ConversationSidebar from "@/components/ConversationSidebar";
@@ -14,12 +16,16 @@ import QuickCommands from "@/components/QuickCommands";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import CameraCapture from "@/components/CameraCapture";
 import WelcomeBanner from "@/components/WelcomeBanner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showImageUploader, setShowImageUploader] = useState(false);
   const [showCameraCapture, setShowCameraCapture] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
   const { toast: showToast } = useToast();
+  const isMobile = useIsMobile();
+  
   const {
     conversations,
     currentConversation,
@@ -246,7 +252,6 @@ const Index = () => {
     handleCommand(command);
   };
 
-  // Add these functions for the missing props
   const handleImageUploadRequest = () => {
     setShowImageUploader(true);
   };
@@ -255,23 +260,48 @@ const Index = () => {
     setShowCameraCapture(true);
   };
 
+  const toggleSidebar = () => {
+    setShowSidebar(prev => !prev);
+  };
+
   const messages = getCurrentMessages();
   const showWelcomeBanner = !messages.length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
-      {/* Sidebar s konverzacemi */}
-      <ConversationSidebar 
-        conversations={conversations}
-        currentConversation={currentConversation}
-        onCreateNew={createNewConversation}
-        onSelectConversation={setCurrentConversation}
-        onDeleteConversation={deleteConversation}
-      />
+      {/* Sidebar s konverzacemi - na mobilních zařízeních je skrytá a zobrazí se pouze při tapnutí */}
+      <div className={`${isMobile ? 'fixed z-30 top-0 bottom-0 left-0 transition-transform duration-300' : ''} 
+                       ${(isMobile && showSidebar) ? 'translate-x-0' : (isMobile ? '-translate-x-full' : '')}
+                       ${isMobile ? 'w-4/5 max-w-xs' : ''}
+                       ${isMobile ? 'shadow-lg' : ''}`}>
+        <ConversationSidebar 
+          conversations={conversations}
+          currentConversation={currentConversation}
+          onCreateNew={createNewConversation}
+          onSelectConversation={(id) => {
+            setCurrentConversation(id);
+            if (isMobile) {
+              setShowSidebar(false);
+            }
+          }}
+          onDeleteConversation={deleteConversation}
+        />
+      </div>
+
+      {/* Overlay pro zavření sidebar na mobilních zařízeních */}
+      {isMobile && showSidebar && (
+        <div 
+          className="fixed inset-0 z-20 bg-black/50" 
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
 
       {/* Hlavní chatová oblast */}
-      <div className="flex-1 flex flex-col">
-        <ChatHeader />
+      <div className="flex-1 flex flex-col relative">
+        <MobileChatHeader 
+          onToggleSidebar={toggleSidebar}
+          showSidebarToggle={isMobile}
+        />
         
         {showWelcomeBanner ? (
           <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
