@@ -1,6 +1,6 @@
 
 import { CommandResult } from './types';
-import { getStructuredResponseFromGemini, getRecipeListSchema } from '@/services/apiService';
+import { getStructuredResponseFromGemini, getRecipeListSchema } from '@/services/geminiService';
 import { toast } from 'sonner';
 
 export const recipeCommand = async (foodName: string): Promise<CommandResult> => {
