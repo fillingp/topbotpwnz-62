@@ -187,7 +187,7 @@ export async function processCommand(command: string): Promise<CommandResult> {
       } catch (error) {
         console.error('Error generating image:', error);
         return {
-          content: `Nepodařilo se vygenerovat obrázek: ${error.message || "Neznámá chyba"}. Zkus to znovu s jiným zadáním. 🤔`,
+          content: `Nepodařilo se vygenerovat obrázek: ${error instanceof Error ? error.message : "Neznámá chyba"}. Zkus to znovu s jiným zadáním. 🤔`,
           type: 'error'
         };
       }
@@ -232,7 +232,7 @@ Dobrou chuť! 😋
       } catch (error) {
         console.error('Error getting recipe:', error);
         return {
-          content: `Nepodařilo se získat recept: ${error.message || "Neznámá chyba"}. Zkus to znovu později. 🤔`,
+          content: `Nepodařilo se získat recept: ${error instanceof Error ? error.message : "Neznámá chyba"}. Zkus to znovu později. 🤔`,
           type: 'error'
         };
       }

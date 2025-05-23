@@ -5,8 +5,8 @@ import {
   HarmBlockThreshold
 } from '@google/generative-ai';
 
-// Import the Google GenAI client correctly
-import { GoogleGenerativeAI as GoogleGenAI } from '@google/genai';
+// Import the Google GenAI client correctly from @google/genai
+import * as genai from '@google/genai';
 
 const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
 
@@ -157,13 +157,13 @@ export const generateImageWithGemini = async (prompt: string): Promise<string> =
   try {
     console.log("Generuji obrázek pomocí Gemini API:", prompt);
     
-    // Použití správné instance GoogleGenerativeAI z @google/genai
-    const genai = new GoogleGenAI({ apiKey: GOOGLE_API_KEY });
+    // Použití správné instance z @google/genai
+    const genaiClient = new genai.GoogleGenerativeAI(GOOGLE_API_KEY);
     
     const czechPrompt = `Vytvoř obrázek podle tohoto zadání: ${prompt}`;
 
     // Použití správného rozhraní pro generování obrázků
-    const result = await genai.generateContent({
+    const result = await genaiClient.generateContent({
       model: "gemini-2.0-flash-preview-image-generation",
       contents: [{ role: "user", parts: [{ text: czechPrompt }] }],
       config: {
@@ -193,10 +193,10 @@ export const getStructuredResponseFromGemini = async <T>(prompt: string, schema:
   try {
     console.log("Získávám strukturovanou odpověď z Gemini API:", prompt);
     
-    // Použití správné instance GoogleGenerativeAI z @google/genai
-    const genai = new GoogleGenAI({ apiKey: GOOGLE_API_KEY });
+    // Použití správné instance z @google/genai
+    const genaiClient = new genai.GoogleGenerativeAI(GOOGLE_API_KEY);
     
-    const result = await genai.generateContent({
+    const result = await genaiClient.generateContent({
       model: "gemini-2.0-flash",
       contents: [{ role: "user", parts: [{ text: `${prompt} (odpověz v češtině)` }] }],
       config: {
