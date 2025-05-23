@@ -128,4 +128,3 @@ export const getStructuredResponseFromGemini = async <T>(prompt: string, schema:
     throw new Error("Nepodařilo se získat strukturovanou odpověď. Zkuste to prosím později.");
   }
 };
-

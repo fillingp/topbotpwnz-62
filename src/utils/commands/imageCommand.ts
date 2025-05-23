@@ -1,6 +1,6 @@
 
 import { CommandResult } from './types';
-import { generateImageWithGemini } from '@/services/gemini/imageService';
+import { generateImageWithGemini } from '@/services/apiService';
 import { toast } from 'sonner';
 
 export const imageCommand = async (prompt: string): Promise<CommandResult> => {
