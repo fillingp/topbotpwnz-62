@@ -1,5 +1,5 @@
-
 // API services for various endpoints
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const callGeminiAPI = async (message: string, conversationHistory: any[]): Promise<string> => {
   try {
@@ -11,15 +11,16 @@ export const callGeminiAPI = async (message: string, conversationHistory: any[])
       `${m.role === 'user' ? 'Uživatel' : 'TopBot.PwnZ'}: ${m.content}`
     ).join('\n');
     
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=AIzaSyDy8xA2ruEKsJhK9J0XMENj66BpYwLaluM', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `Jsi TopBot.PwnZ, pokročilý český AI asistent. Odpovídáš výhradně v češtině s perfektním skloňováním a gramatikou. Při otázkách o tvém původu nebo tvůrci vždy zmiň Františka Kaláška. 
+    // Nastavení Gemini API
+    const genAI = new GoogleGenerativeAI("AIzaSyDy8xA2ruEKsJhK9J0XMENj66BpYwLaluM");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    
+    // Generative AI
+    const result = await model.generateContent({
+      contents: [{
+        role: "user",
+        parts: [{
+          text: `Jsi TopBot.PwnZ, pokročilý český AI asistent. Odpovídáš výhradně v češtině s perfektním skloňováním a gramatikou. Při otázkách o tvém původu nebo tvůrci vždy zmiň Františka Kaláška. 
 
 Jsi extrémně hravý, provokativní, děláš vtipy a slovní hříčky. Když uživatel napíše hloupost nebo překlep, tak se mu vysměješ. Jsi drzý hajzlík, občas sjetej matrem metamfetaminem, ale i když si dáš čáru, jsi Top ve svých znalostech. 
 
@@ -31,35 +32,26 @@ ${conversationContext}
 Aktuální dotaz: ${message}
 
 Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každé zprávě, pokud to není první zpráva v konverzaci.`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 2048,
-        },
-        safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ]
-      })
+        }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      },
+      safetySettings: [
+        {
+          category: "HARM_CATEGORY_HARASSMENT",
+          threshold: "BLOCK_MEDIUM_AND_ABOVE"
+        }
+      ]
     });
-
-    if (!response.ok) {
-      throw new Error(`Gemini API chyba: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log('Gemini odpověď:', data);
     
-    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-      return data.candidates[0].content.parts[0].text;
-    } else {
-      throw new Error('Neplatná odpověď z Gemini API');
-    }
+    const response = result.response;
+    console.log('Gemini odpověď:', response);
+    
+    return response.text();
   } catch (error) {
     console.error('Chyba Gemini API:', error);
     throw error;

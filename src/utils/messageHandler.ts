@@ -1,4 +1,5 @@
 
+
 import { Message } from '@/types/chat';
 import { callGeminiAPI, callPerplexityAPI, callSerperAPI, performWebSearch } from '@/services/apiService';
 import { analyzeImage, formatAnalysisResult, ImageAnalysisResult } from './imageAnalysisService';
@@ -129,3 +130,4 @@ export const speakText = async (text: string, voiceType: 'FEMALE' | 'MALE' = 'FE
     return false;
   }
 };
+

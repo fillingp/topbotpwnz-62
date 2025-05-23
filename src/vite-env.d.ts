@@ -3,7 +3,7 @@
 
 interface Window {
   Capacitor?: {
-    isNativePlatform: () => boolean;
+    isNativePlatform?: () => boolean;
     isNative?: boolean;
-  }
+  };
 }
