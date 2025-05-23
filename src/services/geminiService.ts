@@ -1,6 +1,6 @@
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GOOGLE_API_KEY, defaultGenerationConfig, defaultSafetySettings } from './gemini/config';
+import { GOOGLE_API_KEY } from './gemini/config';
 
 // Re-export gemini functions from their proper modules
 export { 
@@ -15,6 +15,9 @@ export {
 } from './gemini/imageService';
 
 export { getRecipeListSchema } from './gemini/schemaService';
+
+// Export the configuration
+export { GOOGLE_API_KEY, defaultGenerationConfig, defaultSafetySettings } from './gemini/config';
 
 /**
  * Helper function to create a new instance of GoogleGenerativeAI

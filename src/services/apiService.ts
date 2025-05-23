@@ -7,7 +7,10 @@ export {
   generateImageWithGemini,
   getStructuredResponseFromGemini,
   getRecipeListSchema,
-  createGenAI
+  createGenAI,
+  GOOGLE_API_KEY,
+  defaultGenerationConfig,
+  defaultSafetySettings
 } from './geminiService';
 
 export {
