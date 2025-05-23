@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,7 +6,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Eye, Lightbulb, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import ChatHeader from "@/components/ChatHeader";
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { 
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold
+} from '@google/generative-ai';
 import { GOOGLE_API_KEY } from '@/services/gemini/config';
 
 // Safety settings types
@@ -111,6 +114,7 @@ const VerseVis: React.FC = () => {
 
       const promptPart = { text: input };
       
+      // Proper type usage for generateContent with safetySettings
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [promptPart, imagePart] }],
         generationConfig: {
