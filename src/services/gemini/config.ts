@@ -1,4 +1,6 @@
 
+import { HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
+
 // Configuration for Gemini API
 export const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
 
@@ -11,7 +13,7 @@ export const defaultGenerationConfig = {
 
 export const defaultSafetySettings = [
   {
-    category: "HARM_CATEGORY_HARASSMENT",
-    threshold: "BLOCK_MEDIUM_AND_ABOVE"
+    category: "HARM_CATEGORY_HARASSMENT" as unknown as HarmCategory,
+    threshold: "BLOCK_MEDIUM_AND_ABOVE" as unknown as HarmBlockThreshold
   }
 ];

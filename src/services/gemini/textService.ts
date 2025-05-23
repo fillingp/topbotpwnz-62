@@ -1,5 +1,5 @@
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
 import { GOOGLE_API_KEY, defaultGenerationConfig, defaultSafetySettings } from './config';
 
 /**
@@ -18,6 +18,12 @@ export const callGeminiAPI = async (message: string, conversationHistory: any[])
     // Nastavení Gemini API s novým SDK
     const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    // Correct the safety settings with proper types
+    const safetySettings = defaultSafetySettings.map(setting => ({
+      category: setting.category as HarmCategory,
+      threshold: setting.threshold as HarmBlockThreshold
+    }));
     
     // Generative AI
     const parts = [
@@ -40,7 +46,7 @@ Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každ
     const result = await model.generateContent({
       contents: [{ role: "user", parts }],
       generationConfig: defaultGenerationConfig,
-      safetySettings: defaultSafetySettings
+      safetySettings
     });
     
     const response = result.response;

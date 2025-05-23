@@ -1,5 +1,5 @@
 
-import { callGeminiAPI } from './geminiService';
+import { callGeminiAPI } from './gemini';
 import { callPerplexityAPI } from './perplexityService';
 import { callSerperAPI } from './serperService';
 
