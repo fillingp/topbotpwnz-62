@@ -11,6 +11,7 @@ import ImageUploader from "@/components/ImageUploader";
 import CameraCapture from "@/components/CameraCapture";
 import ChatContainer from "@/components/ChatContainer";
 import WebSearchHandler from "@/components/WebSearchHandler";
+import { Message } from "@/types/chat";
 
 const Index = () => {
   const [showImageUploader, setShowImageUploader] = useState(false);
@@ -49,10 +50,10 @@ const Index = () => {
     toast.info("Zadejte dotaz pro vyhledávání na webu");
     
     // Create a temporary prompt for web search input
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now().toString(),
       content: "🔍 *Web search aktivován* - Napište svůj dotaz",
-      role: 'assistant',
+      role: 'assistant', // Fixed: Using literal 'assistant' instead of string type
       timestamp: new Date(),
       isGuide: true
     };
