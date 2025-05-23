@@ -13,6 +13,7 @@ import ImageUploader from "@/components/ImageUploader";
 import QuickCommands from "@/components/QuickCommands";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import CameraCapture from "@/components/CameraCapture";
+import WelcomeBanner from "@/components/WelcomeBanner";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -254,6 +255,9 @@ const Index = () => {
     setShowCameraCapture(true);
   };
 
+  const messages = getCurrentMessages();
+  const showWelcomeBanner = !messages.length;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex">
       {/* Sidebar s konverzacemi */}
@@ -268,7 +272,14 @@ const Index = () => {
       {/* Hlavní chatová oblast */}
       <div className="flex-1 flex flex-col">
         <ChatHeader />
-        <ChatMessageList messages={getCurrentMessages()} />
+        
+        {showWelcomeBanner ? (
+          <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
+            <WelcomeBanner />
+          </div>
+        ) : (
+          <ChatMessageList messages={messages} />
+        )}
         
         {/* Rychlé příkazy */}
         <QuickCommands 

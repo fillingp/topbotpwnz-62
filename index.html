@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TopBot.PwnZ - Český AI asistent</title>
     <meta name="description" content="Extrémně pokročilý český AI asistent s výraznou osobností" />
     <meta name="author" content="František Kalášek" />
@@ -17,9 +17,16 @@
     <meta name="twitter:site" content="@topbot_pwnz.qq" />
     <meta name="twitter:image" content="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" />
     
+    <!-- PWA configuration -->
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" type="image/png" />
     <meta name="theme-color" content="#6d28d9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" />
+    
+    <!-- Disable tap highlight on IE -->
+    <meta name="msapplication-tap-highlight" content="no" />
   </head>
 
   <body>
@@ -27,5 +34,19 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register the service worker
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(function(registration) {
+              console.log('Service Worker registered with scope:', registration.scope);
+            })
+            .catch(function(error) {
+              console.log('Service Worker registration failed:', error);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
