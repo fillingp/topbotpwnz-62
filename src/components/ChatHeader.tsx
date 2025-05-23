@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { HelpCircle, Image, BadgeInfo } from "lucide-react";
+import { HelpCircle, Eye, BadgeInfo } from "lucide-react";
 
 const ChatHeader: React.FC = () => {
   return (
@@ -20,10 +20,10 @@ const ChatHeader: React.FC = () => {
           </div>
         </div>
         <div className="flex space-x-2">
-          <Link to="/image-generator">
+          <Link to="/verse-vis">
             <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
-              <Image className="w-4 h-4 mr-1" />
-              Generátor
+              <Eye className="w-4 h-4 mr-1" />
+              VerseVis
             </Button>
           </Link>
           <Link to="/about">
