@@ -11,12 +11,12 @@ const ChatHeader: React.FC = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <Avatar className="h-10 w-10 bg-gradient-to-r from-blue-500 to-purple-600">
-            <AvatarImage src="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" alt="TopBot.PwnZ" />
-            <AvatarFallback className="text-white font-bold">TB</AvatarFallback>
+            <AvatarImage src="/lovable-uploads/919269ed-b648-431b-8bf2-99352022aff3.png" alt="Topwnz" />
+            <AvatarFallback className="text-white font-bold">TW</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="text-xl font-bold text-white">TopBot.PwnZ</h1>
-            <p className="text-sm text-slate-300">Váš pokročilý a drzý český AI asistent 🤪</p>
+            <h1 className="text-xl font-bold text-white">Topwnz</h1>
+            <p className="text-sm text-slate-300">Váš pokročilý český AI asistent 🧠</p>
           </div>
         </div>
         <Link to="/about">

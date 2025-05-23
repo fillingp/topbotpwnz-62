@@ -1,12 +1,11 @@
-
-const CACHE_NAME = 'topbot-pwnz-cache-v1';
+const CACHE_NAME = 'topwnz-cache-v1';
 
 // URLs to cache
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png'
+  '/lovable-uploads/919269ed-b648-431b-8bf2-99352022aff3.png'
 ];
 
 // Install the service worker and cache assets
@@ -75,9 +74,9 @@ self.addEventListener('push', (event) => {
   const data = event.data.json();
   
   const options = {
-    body: data.body || 'Nová zpráva od TopBot.PwnZ',
-    icon: '/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png',
-    badge: '/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png',
+    body: data.body || 'Nová zpráva od Topwnz',
+    icon: '/lovable-uploads/919269ed-b648-431b-8bf2-99352022aff3.png',
+    badge: '/lovable-uploads/919269ed-b648-431b-8bf2-99352022aff3.png',
     vibrate: [100, 50, 100],
     data: {
       url: data.url || '/'
@@ -85,7 +84,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'TopBot.PwnZ', options)
+    self.registration.showNotification(data.title || 'Topwnz', options)
   );
 });
 

@@ -22,7 +22,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             </AvatarFallback>
           ) : (
             <>
-              <AvatarImage src="/lovable-uploads/8b034600-b266-48d5-8cd1-0acf7f134350.png" alt="TopBot.PwnZ" />
+              <AvatarImage src="/lovable-uploads/919269ed-b648-431b-8bf2-99352022aff3.png" alt="Topwnz" />
               <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500">
                 <Bot className="w-4 h-4" />
               </AvatarFallback>
@@ -38,7 +38,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
             {message.isTyping ? (
               <div className="flex items-center space-x-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span className="text-sm">TopBot.PwnZ píše...</span>
+                <span className="text-sm">Topwnz píše...</span>
               </div>
             ) : (
               <div className="prose prose-invert max-w-none">
