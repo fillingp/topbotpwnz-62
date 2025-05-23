@@ -3,22 +3,23 @@ import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Facebook, Instagram, Mail, MessageCircle } from "lucide-react";
+import { Facebook, Instagram, Mail, MessageCircle, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 px-4 overflow-auto">
+      <div className="max-w-4xl mx-auto pb-20">
         <Link 
           to="/"
-          className="inline-block mb-8 text-white hover:text-blue-300 transition-colors"
+          className="inline-flex items-center mb-8 text-white hover:text-blue-300 transition-colors"
         >
-          ← Zpět na chat
+          <ArrowLeft className="w-4 h-4 mr-1" />
+          Zpět na chat
         </Link>
         
-        <Card className="bg-slate-800/80 border-slate-700/50 backdrop-blur-lg mb-8">
-          <CardContent className="p-6">
+        <Card className="bg-slate-800/80 border-slate-700/50 backdrop-blur-lg mb-8 overflow-hidden">
+          <CardContent className="p-6 overflow-auto">
             <h1 className="text-3xl font-bold text-white mb-6">O aplikaci TopBot.PwnZ</h1>
             
             <div className="space-y-4 text-slate-100">
@@ -55,17 +56,17 @@ const AboutPage = () => {
               <h2 className="text-xl font-bold text-white mt-6">Technologie:</h2>
               <ul className="list-disc pl-5 space-y-2">
                 <li>Frontend: React, Tailwind CSS, shadcn/ui</li>
-                <li>AI: Google Gemini AI 2.0+, Perplexity (pro pokročilé analýzy)</li>
+                <li>AI: Google Gemini 2.5, Perplexity (pro pokročilé analýzy)</li>
                 <li>API integrace: Google Cloud Platform, Google Maps, Weather API</li>
-                <li>PWA: Next-PWA pro offline podporu</li>
+                <li>PWA: Service worker pro offline podporu</li>
                 <li>Vyhledávání: Serper API (záložní řešení)</li>
               </ul>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/80 border-slate-700/50 backdrop-blur-lg mb-8">
-          <CardContent className="p-6">
+        <Card className="bg-slate-800/80 border-slate-700/50 backdrop-blur-lg mb-8 overflow-hidden">
+          <CardContent className="p-6 overflow-auto">
             <h1 className="text-2xl font-bold text-white mb-6">Tvůrce</h1>
             
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
@@ -107,8 +108,8 @@ const AboutPage = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-slate-800/80 border-slate-700/50 backdrop-blur-lg">
-          <CardContent className="p-6">
+        <Card className="bg-slate-800/80 border-slate-700/50 backdrop-blur-lg overflow-hidden">
+          <CardContent className="p-6 overflow-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-center md:text-left">
                 <h2 className="text-2xl font-bold text-white mb-2">VerseVis</h2>

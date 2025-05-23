@@ -1,8 +1,5 @@
-
-
 import { Message } from '@/types/chat';
-import { callGeminiAPI, callPerplexityAPI, callSerperAPI, performWebSearch } from '@/services/apiService';
-import { analyzeImage, formatAnalysisResult, ImageAnalysisResult } from './imageAnalysisService';
+import { callGeminiAPI, analyzeImageWithGemini, performWebSearch } from '@/services/apiService';
 import { synthesizeSpeech, playAudio } from './speechService';
 import { toast } from 'sonner';
 
@@ -83,8 +80,9 @@ export const ensureEmojis = (text: string): string => {
 
 export const processImageAnalysis = async (imageData: string): Promise<string> => {
   try {
-    const result: ImageAnalysisResult = await analyzeImage(imageData);
-    return formatAnalysisResult(result);
+    console.log("Processing image analysis with Gemini Vision...");
+    const result = await analyzeImageWithGemini(imageData);
+    return result;
   } catch (error) {
     console.error('Chyba při zpracování analýzy obrázku:', error);
     return "Bohužel došlo k chybě při analýze obrázku. 😞 Zkuste to prosím znovu později.";
@@ -130,4 +128,3 @@ export const speakText = async (text: string, voiceType: 'FEMALE' | 'MALE' = 'FE
     return false;
   }
 };
-
