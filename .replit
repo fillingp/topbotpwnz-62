@@ -5,4 +5,17 @@ run = "npm run dev"
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "npm run dev"]
+run = ["sh", "-c", "npx serve -s dist"]
+build = ["sh", "-c", "npm run build"]
+
+[workflows]
+runButton = "Run"
+
+[[workflows.workflow]]
+name = "Run"
+author = 42989215
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
