@@ -18,9 +18,9 @@ export {
   performWebSearch 
 } from './searchService';
 
-// Export the Google Vision services for image analysis
+// Export the image analysis services 
 export { 
   analyzeImage, 
   formatAnalysisResult, 
   type ImageAnalysisResult 
-} from './visionService';
+} from '../utils/imageAnalysis';
