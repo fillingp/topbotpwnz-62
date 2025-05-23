@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Kontrola, zda jsme na Capacitor platformě
   const isCapacitorPlatform = 
     window.Capacitor !== undefined && 
-    window.Capacitor.isNativePlatform();
+    (window.Capacitor.isNativePlatform?.() || window.Capacitor.isNative);
     
   if (isCapacitorPlatform) {
     initializeCapacitor();
