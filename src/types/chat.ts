@@ -5,6 +5,7 @@ export interface Message {
   role: 'user' | 'assistant';
   timestamp: Date;
   isTyping?: boolean;
+  isGuide?: boolean;
 }
 
 export interface Conversation {

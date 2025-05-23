@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Camera, Laugh, Heart, Sparkles, Smile, Mic, Search, Image, RefreshCw, GitHub, Brain, Calculator, Star } from "lucide-react";
+import { Camera, Laugh, Heart, Sparkles, Smile, Mic, Search, Image, RefreshCw, Github, Brain, Calculator, Star } from "lucide-react";
 
 interface QuickCommandsProps {
   onCommandSelected: (command: string) => void;
