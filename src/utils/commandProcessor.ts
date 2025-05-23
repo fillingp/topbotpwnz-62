@@ -14,6 +14,7 @@ import {
   imageCommand,
   recipeCommand
 } from './commands';
+import { thinkingCommand, logicCommand } from './commands/thinkingCommand';
 
 export { availableCommands } from './commandsList';
 
@@ -63,6 +64,13 @@ export async function processCommand(command: string): Promise<CommandResult> {
     // Příkaz pro generování strukturovaných receptů
     case '/recept':
       return await recipeCommand(args);
+
+    // Thinking příkazy s Gemini 2.5
+    case '/think':
+      return await thinkingCommand(args);
+      
+    case '/logic':
+      return await logicCommand(args);
 
     default:
       // Pokud příkaz neexistuje, zkusíme odpovědět přes Gemini API

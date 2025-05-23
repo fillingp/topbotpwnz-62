@@ -16,6 +16,15 @@ export {
 
 export { getRecipeListSchema } from './gemini/schemaService';
 
+// Export thinking functions
+export { 
+  geminiThinking,
+  generateWithThoughts,
+  streamWithThoughts,
+  solveComplexProblem,
+  GeminiThinkingService
+} from './gemini/thinkingService';
+
 // Export the configuration
 export { GOOGLE_API_KEY, defaultGenerationConfig, defaultSafetySettings } from './gemini/config';
 

@@ -10,7 +10,13 @@ export {
   createGenAI,
   GOOGLE_API_KEY,
   defaultGenerationConfig,
-  defaultSafetySettings
+  defaultSafetySettings,
+  // Thinking functions
+  geminiThinking,
+  generateWithThoughts,
+  streamWithThoughts,
+  solveComplexProblem,
+  GeminiThinkingService
 } from './geminiService';
 
 export {
