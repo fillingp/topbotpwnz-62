@@ -17,55 +17,55 @@ const QuickCommands: React.FC<QuickCommandsProps> = ({
   onWebSearchRequested
 }) => {
   return (
-    <div className="flex flex-wrap gap-2 mb-2 px-4 justify-center">
-      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 w-full">
+    <div className="flex flex-wrap gap-2 mb-2 px-2 md:px-4 justify-center safe-bottom">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 md:gap-2 w-full">
         <Button 
           variant="outline" 
           size="sm"
-          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
           onClick={() => onCommandSelected("/help")}
         >
-          <Sparkles className="w-4 h-4 mr-1" />
+          <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
           Nápověda
         </Button>
         
         <Button 
           variant="outline"
           size="sm"
-          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
           onClick={() => onCommandSelected("/joke")}
         >
-          <Laugh className="w-4 h-4 mr-1" />
+          <Laugh className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
           Vtip
         </Button>
         
         <Button 
           variant="outline"
           size="sm"
-          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
           onClick={() => onCommandSelected("/forher")}
         >
-          <Heart className="w-4 h-4 mr-1" />
+          <Heart className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
           Pro ni
         </Button>
         
         <Button 
           variant="outline"
           size="sm"
-          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
           onClick={() => onCommandSelected("/forhim")}
         >
-          <Smile className="w-4 h-4 mr-1" />
+          <Smile className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
           Pro něj
         </Button>
         
         <Button 
           variant="outline"
           size="sm"
-          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+          className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
           onClick={() => onImageAnalysisRequested()}
         >
-          <Image className="w-4 h-4 mr-1" />
+          <Image className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
           Analýza obr.
         </Button>
         
@@ -73,10 +73,10 @@ const QuickCommands: React.FC<QuickCommandsProps> = ({
           <Button 
             variant="outline"
             size="sm"
-            className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+            className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
             onClick={onWebSearchRequested}
           >
-            <Search className="w-4 h-4 mr-1" />
+            <Search className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Vyhledat
           </Button>
         )}
@@ -85,10 +85,10 @@ const QuickCommands: React.FC<QuickCommandsProps> = ({
           <Button 
             variant="outline"
             size="sm"
-            className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center"
+            className="bg-slate-700/50 border-slate-600 hover:bg-slate-700 text-white flex items-center justify-center text-xs sm:text-sm"
             onClick={onSpeechToTextRequested}
           >
-            <Mic className="w-4 h-4 mr-1" />
+            <Mic className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
             Hlas
           </Button>
         )}

@@ -14,12 +14,12 @@ const MobileChatHeader: React.FC<MobileChatHeaderProps> = ({
   showSidebarToggle
 }) => {
   return (
-    <div className="relative">
+    <div className="relative safe-top notch-padding-top">
       {showSidebarToggle && (
         <Button
           variant="ghost"
           size="icon"
-          className="absolute left-2 top-1/2 -translate-y-1/2 z-10"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-10 min-h-[40px] w-10 h-10"
           onClick={onToggleSidebar}
         >
           <Menu className="h-5 w-5" />
