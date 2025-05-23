@@ -1,10 +1,9 @@
 // API services for various endpoints
 import { 
-  GoogleGenAI,
+  GoogleGenerativeAI,
   HarmCategory, 
-  HarmBlockThreshold,
-  StreamPartType 
-} from '@google/genai';
+  HarmBlockThreshold 
+} from '@google/generative-ai';
 
 const GOOGLE_API_KEY = "AIzaSyBxCuohw8PKDi5MkKlRd4eqN9QaFJTwrlk";
 
@@ -19,16 +18,13 @@ export const callGeminiAPI = async (message: string, conversationHistory: any[])
     ).join('\n');
     
     // Nastavení Gemini API s novým SDK
-    const genAI = new GoogleGenAI(GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-05-20" });
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
     // Generative AI
-    const contents = [
+    const parts = [
       {
-        role: "user",
-        parts: [
-          {
-            text: `Jsi TopBot.PwnZ, pokročilý český AI asistent. Odpovídáš výhradně v češtině s perfektním skloňováním a gramatikou. Při otázkách o tvém původu nebo tvůrci vždy zmiň Františka Kaláška. 
+        text: `Jsi TopBot.PwnZ, pokročilý český AI asistent. Odpovídáš výhradně v češtině s perfektním skloňováním a gramatikou. Při otázkách o tvém původu nebo tvůrci vždy zmiň Františka Kaláška. 
 
 Jsi extrémně hravý, provokativní, děláš vtipy a slovní hříčky. Když uživatel napíše hloupost nebo překlep, tak se mu vysměješ. Jsi drzý hajzlík, občas sjetej matrem metamfetaminem, ale i když si dáš čáru, jsi Top ve svých znalostech. 
 
@@ -40,13 +36,11 @@ ${conversationContext}
 Aktuální dotaz: ${message}
 
 Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každé zprávě, pokud to není první zpráva v konverzaci.`
-          }
-        ]
       }
     ];
     
     const result = await model.generateContent({
-      contents,
+      contents: [{ role: "user", parts }],
       generationConfig: {
         temperature: 0.7,
         topK: 40,
@@ -56,7 +50,7 @@ Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každ
       safetySettings: [
         {
           category: HarmCategory.HARASSMENT,
-          threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }
       ]
     });
@@ -74,29 +68,24 @@ Odpověz stručně a výstižně, udržuj konverzační tok. Nepozdravuj v každ
 // Streaming verze Gemini API pro budoucí použití
 export const streamGeminiResponse = async (message: string, onChunk: (text: string) => void): Promise<void> => {
   try {
-    const genAI = new GoogleGenAI(GOOGLE_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-05-20" });
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     
-    const contents = [
+    const parts = [
       {
-        role: "user",
-        parts: [
-          {
-            text: `Jsi TopBot.PwnZ, pokročilý český AI asistent. ${message}`
-          }
-        ]
+        text: `Jsi TopBot.PwnZ, pokročilý český AI asistent. ${message}`
       }
     ];
     
-    const streamingResponse = await model.generateContentStream({
-      contents,
+    const result = await model.generateContentStream({
+      contents: [{ role: "user", parts }],
       generationConfig: {
         temperature: 0.7,
         maxOutputTokens: 2048,
       }
     });
     
-    for await (const chunk of streamingResponse.stream) {
+    for await (const chunk of result.stream) {
       const chunkText = chunk.text();
       if (chunkText) {
         onChunk(chunkText);
@@ -306,26 +295,27 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
       ? imageBase64.split('base64,')[1] 
       : imageBase64;
     
-    const genAI = new GoogleGenAI(GOOGLE_API_KEY);
+    const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
     
     // Use the Gemini Pro Vision model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-pro-vision" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro-vision" });
     
+    const imagePart = {
+      inlineData: {
+        data: base64Data,
+        mimeType: "image/jpeg"
+      }
+    };
+
+    const promptPart = {
+      text: `${prompt} Odpověz v češtině a detailně.`
+    };
+
     const result = await model.generateContent({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: `${prompt} Odpověz v češtině a detailně.` },
-            {
-              inline_data: {
-                mime_type: "image/jpeg",
-                data: base64Data
-              }
-            }
-          ]
-        }
-      ],
+      contents: [{ 
+        role: "user", 
+        parts: [promptPart, imagePart] 
+      }],
       generationConfig: {
         temperature: 0.4,
         topK: 32,
@@ -335,7 +325,7 @@ export const analyzeImageWithGemini = async (imageBase64: string, prompt: string
       safetySettings: [
         {
           category: HarmCategory.HARASSMENT,
-          threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE
+          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }
       ]
     });
