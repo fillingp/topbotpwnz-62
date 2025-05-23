@@ -17,6 +17,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import CameraCapture from "@/components/CameraCapture";
 import WelcomeBanner from "@/components/WelcomeBanner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { performWebSearch } from "@/services/apiService";
 
 const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -137,6 +138,7 @@ const Index = () => {
     setIsLoading(true);
     
     try {
+      console.log("Processing command:", commandText);
       const result = await processCommand(commandText);
       
       const assistantMessage: Message = {
@@ -224,17 +226,101 @@ const Index = () => {
     }
   };
 
-  // Implement speech-to-text functionality
+  // Handle speech-to-text functionality
   const handleSpeechToText = () => {
     toast.info("Spouštím hlasový vstup...");
     // The functionality is already implemented in ChatInput component
   };
 
   // Implement web search functionality
-  const handleWebSearch = () => {
-    toast.info("Tato funkce ještě není plně implementována.");
-    // This would be implemented in a future update
+  const handleWebSearch = async () => {
+    let convId = currentConversation;
+    if (!convId) {
+      convId = createNewConversation();
+    }
+    
+    toast.info("Zadejte dotaz pro vyhledávání na webu");
+    
+    // Create a temporary prompt for web search input
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      content: "🔍 *Web search aktivován* - Napište svůj dotaz",
+      role: 'assistant',
+      timestamp: new Date(),
+      isGuide: true
+    };
+    
+    const currentMessages = getCurrentMessages();
+    updateConversation(convId, [...currentMessages, userMessage]);
   };
+  
+  // Listen for messages that should trigger web search
+  React.useEffect(() => {
+    const messages = getCurrentMessages();
+    const lastMessage = messages[messages.length - 1];
+    
+    if (lastMessage && lastMessage.role === 'user' && messages.length > 1) {
+      const prevMessage = messages[messages.length - 2];
+      
+      // Check if the previous message was our web search guide
+      if (prevMessage && 
+          prevMessage.role === 'assistant' && 
+          prevMessage.isGuide && 
+          prevMessage.content.includes("Web search aktivován")) {
+        
+        // This is a response to our web search prompt
+        (async () => {
+          let convId = currentConversation;
+          if (!convId) return;
+          
+          const query = lastMessage.content;
+          
+          const typingMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            content: '',
+            role: 'assistant',
+            timestamp: new Date(),
+            isTyping: true
+          };
+          
+          updateConversation(convId, [...messages, typingMessage]);
+          setIsLoading(true);
+          
+          try {
+            console.log("Performing web search for query:", query);
+            const searchResults = await performWebSearch(query);
+            
+            const assistantMessage: Message = {
+              id: (Date.now() + 2).toString(),
+              content: searchResults,
+              role: 'assistant',
+              timestamp: new Date()
+            };
+            
+            // Remove the guide message and add the search results
+            const filteredMessages = messages.filter(m => m.id !== prevMessage.id);
+            updateConversation(convId, [...filteredMessages, assistantMessage]);
+          } catch (error) {
+            console.error("Web search error:", error);
+            toast.error("Chyba při vyhledávání na webu");
+            
+            const errorMessage: Message = {
+              id: (Date.now() + 2).toString(),
+              content: "Bohužel nastala chyba při vyhledávání. Zkuste to prosím znovu. 😔",
+              role: 'assistant',
+              timestamp: new Date()
+            };
+            
+            // Remove the guide message and add the error message
+            const filteredMessages = messages.filter(m => m.id !== prevMessage.id);
+            updateConversation(convId, [...filteredMessages, errorMessage]);
+          } finally {
+            setIsLoading(false);
+          }
+        })();
+      }
+    }
+  }, [getCurrentMessages]);
 
   // Klávesové zkratky
   useKeyboardShortcuts({
