@@ -99,6 +99,7 @@ export const callPerplexityAPI = async (message: string): Promise<string> => {
     });
 
     if (!response.ok) {
+      console.warn(`Perplexity API chyba: ${response.status}`);
       throw new Error(`Perplexity API chyba: ${response.status}`);
     }
 
@@ -142,7 +143,7 @@ export const callSerperAPI = async (message: string): Promise<string> => {
         q: message,
         gl: 'cz',
         hl: 'cs',
-        num: 5, // Increased number of results
+        num: 5,
         includeAnswer: true,
         includeImages: true,
         includeSearchFeatures: true
@@ -150,6 +151,7 @@ export const callSerperAPI = async (message: string): Promise<string> => {
     });
 
     if (!response.ok) {
+      console.warn(`Serper API chyba: ${response.status}`);
       throw new Error(`Serper API chyba: ${response.status}`);
     }
 
@@ -200,15 +202,24 @@ export const performWebSearch = async (query: string): Promise<string> => {
   try {
     // First try Perplexity
     try {
+      console.log("Trying Perplexity API first...");
       return await callPerplexityAPI(query);
     } catch (perplexityError) {
       console.log('Perplexity API selhala, přepínám na Serper...', perplexityError);
       
       // Then try Serper
       try {
+        console.log("Trying Serper API as fallback...");
         const serperData = await callSerperAPI(query);
+        console.log("Serper API returned data, enhancing with Gemini...");
+        
         // If Serper succeeds but we want enhanced results, use Gemini to format them
-        return await callGeminiAPI(`Na základě těchto informací: ${serperData}\n\nVytvoř kompletní, informativní odpověď na dotaz: ${query}`, []);
+        try {
+          return await callGeminiAPI(`Na základě těchto informací: ${serperData}\n\nVytvoř kompletní, informativní odpověď na dotaz: ${query}`, []);
+        } catch (geminiError) {
+          console.log("Gemini enhancement failed, returning raw Serper data");
+          return serperData; // Return raw Serper data if Gemini enhancement fails
+        }
       } catch (serperError) {
         console.log('Serper API také selhala, používám pouze Gemini...', serperError);
         // Last resort, just use Gemini
@@ -217,6 +228,7 @@ export const performWebSearch = async (query: string): Promise<string> => {
     }
   } catch (error) {
     console.error('Chyba při vyhledávání na webu:', error);
-    throw error;
+    // Return a friendly error message instead of throwing
+    return `Bohužel se nepodařilo získat informace z webu o "${query}". Zkuste to prosím znovu později nebo položte otázku jiným způsobem. 😔`;
   }
 };

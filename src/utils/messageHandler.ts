@@ -1,7 +1,9 @@
+
 import { Message } from '@/types/chat';
 import { callGeminiAPI, callPerplexityAPI, callSerperAPI, performWebSearch } from '@/services/apiService';
 import { analyzeImage, formatAnalysisResult, ImageAnalysisResult } from './imageAnalysisService';
 import { synthesizeSpeech, playAudio } from './speechService';
+import { toast } from 'sonner';
 
 export const shouldUsePerplexity = (message: string): boolean => {
   const perplexityKeywords = [
@@ -22,6 +24,7 @@ export const generateAIResponse = async (input: string, currentMessages: Message
     
     if (shouldUsePerplexity(input)) {
       try {
+        console.log('Using web search for this query...');
         aiResponse = await performWebSearch(input);
       } catch (error) {
         console.log('Web search failed, falling back to Gemini...', error);
@@ -33,19 +36,6 @@ export const generateAIResponse = async (input: string, currentMessages: Message
     
     // Ensure the response contains emoticons
     aiResponse = ensureEmojis(aiResponse);
-    
-    // Optional: Synthesize speech for the response if needed
-    // Uncomment if you want to automatically speak all AI responses
-    /*
-    try {
-      const ttsResult = await synthesizeSpeech(aiResponse.slice(0, 200), 'FEMALE');
-      if (ttsResult.success) {
-        playAudio(ttsResult.audio);
-      }
-    } catch (e) {
-      console.error("Error synthesizing speech:", e);
-    }
-    */
     
     return aiResponse;
   } catch (error) {
@@ -103,6 +93,14 @@ export const processImageAnalysis = async (imageData: string): Promise<string> =
 // Function to synthesize and play speech for a given text
 export const speakText = async (text: string, voiceType: 'FEMALE' | 'MALE' = 'FEMALE'): Promise<boolean> => {
   try {
+    // Check if we've already seen the Text-to-Speech API error
+    const ttsDisabled = localStorage.getItem('tts_disabled') === 'true';
+    
+    if (ttsDisabled) {
+      toast.info("Text-to-speech je dočasně nedostupný.");
+      return false;
+    }
+    
     // Clean the text for TTS (remove markdown, etc.)
     const cleanText = text
       .replace(/#{1,6} /g, '') // Remove markdown headers
@@ -121,6 +119,13 @@ export const speakText = async (text: string, voiceType: 'FEMALE' | 'MALE' = 'FE
     return false;
   } catch (error) {
     console.error('Chyba při syntéze řeči:', error);
+    
+    // If we get a 403 error (API disabled), store that in localStorage to avoid repeated attempts
+    if (error.message && error.message.includes('403')) {
+      localStorage.setItem('tts_disabled', 'true');
+      toast.error("Text-to-speech API není dostupné. Funkce hlasového výstupu je dočasně vypnuta.");
+    }
+    
     return false;
   }
 };

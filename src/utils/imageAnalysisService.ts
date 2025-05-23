@@ -31,14 +31,25 @@ export const analyzeImage = async (imageData: string): Promise<ImageAnalysisResu
   try {
     console.log("Analyzing image...", imageData.slice(0, 50) + "...");
     
-    // Process the image with Google Vision API
-    const result = await processWithGoogleVision(imageData);
-    return result;
+    // First attempt with Google Vision API
+    try {
+      const result = await processWithGoogleVision(imageData);
+      return result;
+    } catch (visionError) {
+      console.error('Google Vision API error, falling back to local analysis:', visionError);
+      // If Google Vision fails, fall back to local analysis
+      return localImageAnalysis(imageData);
+    }
     
   } catch (error) {
     console.error('Chyba při analýze obrázku:', error);
     toast.error("Nepodařilo se analyzovat obrázek. Zkuste to prosím znovu.");
-    throw error;
+    // Return basic analysis result even on error
+    return {
+      description: "Nepodařilo se provést analýzu obrázku. Zkuste to prosím znovu.",
+      tags: ["chyba"],
+      objects: []
+    };
   }
 };
 
@@ -186,10 +197,52 @@ const processWithGoogleVision = async (imageData: string): Promise<ImageAnalysis
     
   } catch (error) {
     console.error('Error processing image with Google Vision:', error);
-    
-    // Fallback to mock data
-    return mockImageAnalysis(imageData);
+    throw error;
   }
+};
+
+// Local image analysis without API calls
+const localImageAnalysis = (imageData: string): ImageAnalysisResult => {
+  console.log("Performing local image analysis");
+  
+  // Extract basic information from image data
+  const isPNG = imageData.includes('image/png');
+  const isJPG = imageData.includes('image/jpeg');
+  const isWebP = imageData.includes('image/webp');
+  const isGIF = imageData.includes('image/gif');
+  
+  // Create a simple format detection
+  const format = isPNG ? 'PNG' : isJPG ? 'JPEG' : isWebP ? 'WebP' : isGIF ? 'GIF' : 'neznámý';
+  
+  // Estimate image size from base64 string
+  const base64Data = imageData.split(',')[1] || '';
+  const sizeInBytes = Math.ceil((base64Data.length * 3) / 4);
+  const sizeInKB = Math.round(sizeInBytes / 1024);
+  
+  // Create mock analysis result
+  const result: ImageAnalysisResult = {
+    description: `Obrázek ve formátu ${format} o velikosti přibližně ${sizeInKB} KB.`,
+    tags: [format.toLowerCase(), "obrázek"],
+    objects: [],
+  };
+  
+  // Add basic color detection based on sample of the base64 data
+  // This is not accurate but provides some basic info for the fallback
+  const hasLotOfData = base64Data.length > 10000;
+  
+  if (hasLotOfData) {
+    result.tags.push("barevný");
+    
+    // Very simple mock color analysis
+    result.dominantColors = [
+      { color: "rgb(120, 120, 120)", score: 0.5 },
+      { color: "rgb(200, 200, 200)", score: 0.3 },
+    ];
+  } else {
+    result.tags.push("jednoduchý");
+  }
+  
+  return result;
 };
 
 // Helper function to estimate age from face features (simplified)
@@ -278,40 +331,6 @@ const translateLikelihoodToCzech = (likelihood: string): string => {
   return translations[likelihood] || likelihood;
 };
 
-// Fallback mock analysis when API fails
-const mockImageAnalysis = (imageData: string): ImageAnalysisResult => {
-  console.log("Fallback to mock image analysis");
-  
-  const mockResult: ImageAnalysisResult = {
-    description: "Obrázek obsahuje osoby a objekty v prostředí.",
-    tags: ["osoba", "město", "budova", "modrá", "denní světlo"],
-    objects: ["osoba", "budova", "auto", "strom"],
-    text: imageData.includes("text") ? "Nějaký rozpoznaný text z obrázku" : undefined,
-    faces: imageData.includes("face") ? [
-      {
-        emotions: ["neutrální", "mírný úsměv"],
-        age: 30,
-        gender: "nespecifikováno"
-      }
-    ] : [],
-    landmarks: ["Praha", "Karlův most"],
-    safeSearch: {
-      adult: "velmi nepravděpodobné",
-      spoof: "velmi nepravděpodobné",
-      medical: "nepravděpodobné",
-      violence: "velmi nepravděpodobné",
-      racy: "nepravděpodobné"
-    },
-    webEntities: ["cestování", "architektura", "turistika"],
-    dominantColors: [
-      { color: "rgb(120, 120, 220)", score: 0.8 },
-      { color: "rgb(200, 200, 200)", score: 0.5 }
-    ]
-  };
-  
-  return mockResult;
-};
-
 export const formatAnalysisResult = (result: ImageAnalysisResult): string => {
   let formattedResult = `# Analýza obrázku 📸\n\n`;
   
@@ -370,7 +389,7 @@ export const formatAnalysisResult = (result: ImageAnalysisResult): string => {
     formattedResult += '\n';
   }
   
-  formattedResult += `\n_Analýza provedena pomocí pokročilého Google Vision API. Výsledky jsou orientační. Pro přesnější analýzu použijte specializované nástroje. 🔍✨_`;
+  formattedResult += `\n_Analýza provedena pomocí pokročilého systému počítačového vidění. Výsledky jsou orientační._`;
   
   return formattedResult;
 };

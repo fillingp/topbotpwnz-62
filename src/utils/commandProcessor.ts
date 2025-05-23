@@ -1,6 +1,7 @@
 
 import { analyzeImage } from './imageAnalysisService';
 import { speakText } from './messageHandler';
+import { toast } from 'sonner';
 
 type CommandResult = {
   content: string;
@@ -59,8 +60,17 @@ export async function processCommand(command: string): Promise<CommandResult> {
         type: 'text' as const,
         speak: true
       };
-      // Auto-speak jokes
-      speakText(jokeResponse.content, 'MALE');
+      
+      // Try to auto-speak jokes but handle failures gracefully
+      try {
+        speakText(jokeResponse.content, 'MALE').catch(err => {
+          console.error('Failed to speak joke:', err);
+          // We'll handle the error quietly since the joke will still be displayed
+        });
+      } catch (e) {
+        console.error('Error initiating speech:', e);
+      }
+      
       return jokeResponse;
       
     case '/weather':
@@ -92,8 +102,20 @@ export async function processCommand(command: string): Promise<CommandResult> {
         type: 'text' as const,
         speak: true
       };
-      // Auto-speak the message
-      speakText(forHimResponse.content, 'FEMALE');
+      
+      // Try to speak but handle failures gracefully
+      try {
+        speakText(forHimResponse.content, 'FEMALE').catch(err => {
+          console.error('Failed to speak message:', err);
+          // We'll handle the error quietly since the message will still be displayed
+          if (err.message && err.message.includes('403')) {
+            toast.info("Hlasový přednes je momentálně nedostupný");
+          }
+        });
+      } catch (e) {
+        console.error('Error initiating speech:', e);
+      }
+      
       return forHimResponse;
       
     case '/forher':
@@ -102,8 +124,20 @@ export async function processCommand(command: string): Promise<CommandResult> {
         type: 'text' as const,
         speak: true
       };
-      // Auto-speak the message
-      speakText(forHerResponse.content, 'MALE');
+      
+      // Try to speak but handle failures gracefully
+      try {
+        speakText(forHerResponse.content, 'MALE').catch(err => {
+          console.error('Failed to speak message:', err);
+          // We'll handle the error quietly since the message will still be displayed
+          if (err.message && err.message.includes('403')) {
+            toast.info("Hlasový přednes je momentálně nedostupný");
+          }
+        });
+      } catch (e) {
+        console.error('Error initiating speech:', e);
+      }
+      
       return forHerResponse;
 
     case '/clear':
@@ -116,14 +150,22 @@ export async function processCommand(command: string): Promise<CommandResult> {
       if (!args) return { content: "A co jako mám říct? Zadej nějaký text! 🔊", type: 'error' };
       
       // Try to speak the provided text
-      const spoken = await speakText(args, 'FEMALE');
-      
-      return {
-        content: spoken 
-          ? `Přečetl jsem: "${args}" 🔊` 
-          : "Nepodařilo se přečíst text. Zkuste to znovu. 😔",
-        type: 'text'
-      };
+      try {
+        const spoken = await speakText(args, 'FEMALE');
+        
+        return {
+          content: spoken 
+            ? `Přečetl jsem: "${args}" 🔊` 
+            : "Hlasový výstup je momentálně nedostupný. Text je zobrazen níže: " + args,
+          type: 'text'
+        };
+      } catch (error) {
+        console.error('Error with speak command:', error);
+        return {
+          content: "Hlasový výstup je momentálně nedostupný. Text je: " + args,
+          type: 'text'
+        };
+      }
 
     default:
       // Pokud příkaz neexistuje, zkusíme odpovědět přes Gemini API
@@ -216,9 +258,11 @@ async function getWeather(location: string): Promise<string> {
 
 async function searchWeb(query: string): Promise<string> {
   try {
-    // V budoucnu napojit na Google Search nebo Serper API
-    return `# Výsledky vyhledávání pro '${query}' 🔍\n\n*Zatím používám ilustrativní data, ale brzo budu napojen na skutečné vyhledávání!*\n\n1. **První výsledek** - Toto je popis prvního výsledku vyhledávání... 📄\n2. **Druhý výsledek** - Další zajímavé informace o vašem dotazu... 📚\n3. **Třetí výsledek** - Podrobnější data k tématu... 📊`;
+    // Import the function directly to avoid circular references
+    const { performWebSearch } = await import('@/services/apiService');
+    return await performWebSearch(query);
   } catch (error) {
+    console.error('Error searching web:', error);
     return `Nemůžu vyhledat '${query}'. Něco se posralo, nebo je tvůj dotaz úplně mimo. 💩`;
   }
 }
